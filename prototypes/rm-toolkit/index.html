@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RM Sales Toolkit — Grassroots Growth Series</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&display=swap" rel="stylesheet" />
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body, #root { height: 100%; overflow: hidden; }
+    body { font-family: 'DM Sans', sans-serif; background: #F7F6F3; color: #1a1a1a; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel">
+    const { useState, useMemo, useRef, useEffect } = React;
+
+    /* ─── DATA ─── */
+    const tiers = {
+      dynamic:      { name: "Dynamic",         rate: 14,   color: "#6B21A8", tkb90: 97.2, risk: "Tinggi",         riskEn: "High",        commission: 1.2,  minInvest: 5000000 },
+      progressive:  { name: "Progressive",     rate: 11,   color: "#2563EB", tkb90: 98.1, risk: "Sedang-Tinggi",  riskEn: "Med-High",    commission: 1.0,  minInvest: 5000000 },
+      balanced:     { name: "Balanced",         rate: 8,    color: "#0D9488", tkb90: 98.8, risk: "Sedang",         riskEn: "Medium",      commission: 0.8,  minInvest: 1000000 },
+      balancedflex: { name: "Balanced - Flex",  rate: 6.5,  color: "#D97706", tkb90: 99.1, risk: "Rendah-Sedang",  riskEn: "Low-Med",     commission: 0.6,  minInvest: 1000000 },
+    };
+
+    const industries = [
+      { name: "Perdagangan", pct: 38, icon: "🏪" },
+      { name: "Pertanian",   pct: 22, icon: "🌾" },
+      { name: "Peternakan",  pct: 18, icon: "🐔" },
+      { name: "Konveksi",    pct: 12, icon: "🧵" },
+      { name: "Makanan",     pct: 10, icon: "🍜" },
+    ];
+
+    const provinces = [
+      { name: "Jawa Barat",     pct: 35 },
+      { name: "Jawa Tengah",    pct: 28 },
+      { name: "Jawa Timur",     pct: 22 },
+      { name: "NTB & Lainnya",  pct: 15 },
+    ];
+
+    const objections = [
+      { q: "Bagaimana kalau banyak yang gagal bayar?", a: "TKB90 kita di atas 97%. Artinya dari 100 pinjaman, 97+ lancar. Ditambah dana proteksi & asuransi kredit, worst-case scenario investor masih untung vs deposito." },
+      { q: "Kenapa return bisa lebih tinggi dari bank?", a: "Kita menyalurkan langsung ke UMKM mikro tanpa overhead cabang bank. Efisiensi ini yang memungkinkan return lebih baik untuk investor sekaligus bunga terjangkau untuk peminjam." },
+      { q: "Apakah uang saya bisa ditarik kapan saja?", a: "Tier Balanced-Flex memungkinkan pencairan lebih awal dengan pengurangan kecil. Tier lain memiliki lock period sesuai tenor yang dipilih." },
+      { q: "Apakah ini aman dan legal?", a: "Kami terdaftar dan diawasi OJK. Dana investor terpisah (segregated account) dan dilindungi asuransi kredit." },
+      { q: "Apa bedanya dengan reksa dana?", a: "Ini peer-to-peer lending — uang Anda langsung ke UMKM produktif. Return fixed, bukan fluktuatif seperti pasar modal. Plus ada dampak sosial langsung." },
+      { q: "Minimum investasinya berapa?", a: "Mulai dari Rp 1 juta untuk Balanced & Balanced-Flex, Rp 5 juta untuk Progressive & Dynamic." },
+    ];
+
+    const suitabilityQuestions = [
+      { id: "horizon", q: "Berapa lama rencana investasi?", options: [
+        { label: "< 6 bulan", score: { balancedflex: 3, balanced: 2, progressive: 1, dynamic: 0 } },
+        { label: "6–12 bulan", score: { balancedflex: 2, balanced: 3, progressive: 2, dynamic: 1 } },
+        { label: "1–2 tahun", score: { balancedflex: 1, balanced: 2, progressive: 3, dynamic: 2 } },
+        { label: "> 2 tahun", score: { balancedflex: 0, balanced: 1, progressive: 2, dynamic: 3 } },
+      ]},
+      { id: "riskTolerance", q: "Toleransi risiko klien?", options: [
+        { label: "Konservatif", score: { balancedflex: 3, balanced: 2, progressive: 0, dynamic: 0 } },
+        { label: "Moderat", score: { balancedflex: 1, balanced: 3, progressive: 2, dynamic: 1 } },
+        { label: "Agresif", score: { balancedflex: 0, balanced: 1, progressive: 2, dynamic: 3 } },
+      ]},
+      { id: "experience", q: "Pengalaman investasi?", options: [
+        { label: "Pemula", score: { balancedflex: 3, balanced: 2, progressive: 1, dynamic: 0 } },
+        { label: "Menengah", score: { balancedflex: 1, balanced: 2, progressive: 3, dynamic: 2 } },
+        { label: "Berpengalaman", score: { balancedflex: 0, balanced: 1, progressive: 2, dynamic: 3 } },
+      ]},
+      { id: "priority", q: "Prioritas utama klien?", options: [
+        { label: "Keamanan modal", score: { balancedflex: 3, balanced: 3, progressive: 1, dynamic: 0 } },
+        { label: "Keseimbangan", score: { balancedflex: 1, balanced: 2, progressive: 3, dynamic: 2 } },
+        { label: "Return maksimal", score: { balancedflex: 0, balanced: 0, progressive: 2, dynamic: 3 } },
+        { label: "Dampak sosial", score: { balancedflex: 2, balanced: 2, progressive: 2, dynamic: 2 } },
+      ]},
+      { id: "liquidity", q: "Kebutuhan likuiditas?", options: [
+        { label: "Butuh fleksibel", score: { balancedflex: 3, balanced: 2, progressive: 0, dynamic: 0 } },
+        { label: "Bisa dikunci", score: { balancedflex: 0, balanced: 1, progressive: 2, dynamic: 3 } },
+      ]},
+    ];
+
+    /* ─── HELPERS ─── */
+    const fmt = (n) => new Intl.NumberFormat("id-ID").format(Math.round(n));
+    const fmtShort = (n) => {
+      if (n >= 1e9) return (n/1e9).toFixed(1).replace(/\.0$/,"") + " M";
+      if (n >= 1e6) return (n/1e6).toFixed(1).replace(/\.0$/,"") + " jt";
+      if (n >= 1e3) return (n/1e3).toFixed(0) + " rb";
+      return fmt(n);
+    };
+
+    function calcReturns(amount, frequency, duration, annualRate) {
+      const mr = annualRate / 100 / 12;
+      let total = 0, totalInvested = 0;
+      const monthlyData = [];
+      for (let m = 1; m <= duration; m++) {
+        if (frequency === "once") {
+          if (m === 1) totalInvested = amount;
+          total = amount * Math.pow(1 + mr, m);
+        } else {
+          totalInvested = amount * m;
+          total = total * (1 + mr) + amount;
+        }
+        monthlyData.push({ month: m, total, invested: frequency === "once" ? amount : amount * m });
+      }
+      const totalEarnings = total - totalInvested;
+      return { total, totalInvested, totalEarnings, monthlyEarning: totalEarnings / duration, monthlyData };
+    }
+
+    /* ─── MAIN APP ─── */
+    function App() {
+      // Active tool tab
+      const [activeTab, setActiveTab] = useState("simulator");
+      // Client
+      const [clientName, setClientName] = useState("");
+      const [clientPhone, setClientPhone] = useState("");
+      const [clientNotes, setClientNotes] = useState("");
+      // Simulator
+      const [amount, setAmount] = useState(25000000);
+      const [frequency, setFrequency] = useState("once");
+      const [duration, setDuration] = useState(12);
+      const [selectedTier, setSelectedTier] = useState("dynamic");
+      // Suitability
+      const [suitAnswers, setSuitAnswers] = useState({});
+      // Presentation mode
+      const [presentMode, setPresentMode] = useState(false);
+
+      const tier = tiers[selectedTier];
+
+      const allResults = useMemo(() => {
+        const r = {};
+        Object.keys(tiers).forEach(k => {
+          r[k] = calcReturns(amount, frequency, duration, tiers[k].rate);
+        });
+        return r;
+      }, [amount, frequency, duration]);
+
+      const result = allResults[selectedTier];
+      const bankResult = calcReturns(amount, frequency, duration, 2.5);
+
+      const beneficiaries = Math.max(1, Math.round(result.totalInvested / 1500000));
+
+      // Suitability scoring
+      const suitScores = useMemo(() => {
+        const scores = { dynamic: 0, progressive: 0, balanced: 0, balancedflex: 0 };
+        Object.values(suitAnswers).forEach(ans => {
+          Object.keys(ans).forEach(k => { scores[k] += ans[k]; });
+        });
+        return scores;
+      }, [suitAnswers]);
+
+      const suitRecommendation = useMemo(() => {
+        const entries = Object.entries(suitScores);
+        if (entries.every(([,v]) => v === 0)) return null;
+        entries.sort((a,b) => b[1] - a[1]);
+        return entries[0][0];
+      }, [suitScores]);
+
+      const tabs = [
+        { id: "simulator", label: "Simulasi", icon: "📊" },
+        { id: "comparison", label: "Perbandingan", icon: "⚖️" },
+        { id: "suitability", label: "Profil Risiko", icon: "🎯" },
+        { id: "objections", label: "Objection Handler", icon: "💬" },
+        { id: "impact", label: "Dampak Sosial", icon: "🌱" },
+      ];
+
+      const amountChips = [5000000, 10000000, 25000000, 50000000, 100000000, 250000000, 500000000];
+      const durations = [3, 6, 12, 24];
+
+      /* ─── PRESENTATION MODE ─── */
+      if (presentMode) {
+        return (
+          <div style={{ height: "100vh", display: "flex", flexDirection: "column", background: "#fff" }}>
+            {/* Top bar */}
+            <div style={{ padding: "12px 24px", borderBottom: "1px solid #F0ECF5", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <button onClick={() => setPresentMode(false)} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 14, color: "#6B7280", display: "flex", alignItems: "center", gap: 6 }}>
+                ← Kembali ke RM View
+              </button>
+              <span style={{ fontSize: 12, color: "#9CA3AF" }}>Mode Presentasi — ditampilkan ke klien</span>
+            </div>
+            <div style={{ flex: 1, overflow: "auto", padding: "40px" }}>
+              <div style={{ maxWidth: 800, margin: "0 auto" }}>
+                {/* Client greeting */}
+                {clientName && (
+                  <p style={{ fontSize: 14, color: "#8B7A9E", marginBottom: 4 }}>Simulasi untuk</p>
+                )}
+                <h1 style={{ fontFamily: "Fraunces, serif", fontSize: 28, fontWeight: 600, marginBottom: 4 }}>
+                  {clientName ? `${clientName}` : "Simulasi Investasi"}
+                </h1>
+                <p style={{ fontSize: 15, color: "#6B7280", marginBottom: 32 }}>Grassroots Growth Series — {tier.name}</p>
+
+                {/* Hero card */}
+                <div style={{
+                  background: `linear-gradient(135deg, ${tier.color}, ${tier.color}dd)`,
+                  borderRadius: 20, padding: "32px 36px", color: "#fff", marginBottom: 24,
+                  position: "relative", overflow: "hidden"
+                }}>
+                  <svg style={{ position: "absolute", right: -30, top: -30, opacity: 0.08 }} width="200" height="200"><circle cx="100" cy="100" r="100" fill="white"/></svg>
+                  <svg style={{ position: "absolute", right: 80, bottom: -40, opacity: 0.06 }} width="120" height="120"><circle cx="60" cy="60" r="60" fill="white"/></svg>
+                  <div style={{ fontSize: 13, opacity: 0.8, marginBottom: 4 }}>
+                    Rp {fmt(amount)}{frequency === "monthly" ? "/bulan" : " (sekali)"} × {duration} bulan
+                  </div>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 24, marginTop: 16 }}>
+                    <div>
+                      <div style={{ fontSize: 12, opacity: 0.7 }}>Total Nilai Portfolio</div>
+                      <div style={{ fontFamily: "Fraunces, serif", fontSize: 32, fontWeight: 700, marginTop: 4 }}>Rp {fmt(result.total)}</div>
+                    </div>
+                    <div style={{ background: "rgba(255,255,255,0.15)", borderRadius: 12, padding: "12px 16px" }}>
+                      <div style={{ fontSize: 12, opacity: 0.8 }}>Total Keuntungan</div>
+                      <div style={{ fontFamily: "Fraunces, serif", fontSize: 24, fontWeight: 600, color: "#86EFAC", marginTop: 4 }}>+Rp {fmt(result.totalEarnings)}</div>
+                    </div>
+                    <div style={{ background: "rgba(255,255,255,0.15)", borderRadius: 12, padding: "12px 16px" }}>
+                      <div style={{ fontSize: 12, opacity: 0.8 }}>Return p.a.</div>
+                      <div style={{ fontFamily: "Fraunces, serif", fontSize: 24, fontWeight: 600, marginTop: 4 }}>{tier.rate}%</div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Chart */}
+                <div style={{ background: "#fff", border: "1px solid #F0ECF5", borderRadius: 20, padding: "28px 32px", marginBottom: 24 }}>
+                  <h3 style={{ fontFamily: "Fraunces, serif", fontSize: 18, fontWeight: 600, marginBottom: 4 }}>Proyeksi Pertumbuhan</h3>
+                  <p style={{ fontSize: 13, color: "#6B7280", marginBottom: 20 }}>vs deposito bank 2.5% p.a.</p>
+                  <GrowthChart data={result.monthlyData} bankData={bankResult.monthlyData} color={tier.color} duration={duration} height={220} />
+                  <div style={{ display: "flex", gap: 20, marginTop: 12, fontSize: 12, color: "#6B7280" }}>
+                    <span style={{ display: "flex", alignItems: "center", gap: 6 }}><span style={{ width: 12, height: 3, borderRadius: 2, background: tier.color, display: "inline-block" }} />{tier.name}</span>
+                    <span style={{ display: "flex", alignItems: "center", gap: 6 }}><span style={{ width: 12, height: 3, borderRadius: 2, background: "#D1D5DB", display: "inline-block", borderTop: "1px dashed #999" }} />Deposito Bank</span>
+                  </div>
+                  <div style={{ marginTop: 16, background: "#F0FDF4", borderRadius: 10, padding: "12px 16px", fontSize: 13, color: "#059669" }}>
+                    Keuntungan Anda <strong>Rp {fmt(result.totalEarnings - bankResult.totalEarnings)}</strong> lebih banyak dari deposito bank
+                  </div>
+                </div>
+
+                {/* Impact section */}
+                <div style={{ background: "#fff", border: "1px solid #F0ECF5", borderRadius: 20, padding: "28px 32px", marginBottom: 24 }}>
+                  <h3 style={{ fontFamily: "Fraunces, serif", fontSize: 18, fontWeight: 600, marginBottom: 16 }}>Dampak Sosial Investasi Anda</h3>
+                  <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 20 }}>
+                    <div style={{ width: 56, height: 56, borderRadius: "50%", background: "linear-gradient(135deg, #F3E8FF, #E9D5FF)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 28 }}>👩🏽</div>
+                    <div>
+                      <div style={{ fontFamily: "Fraunces, serif", fontSize: 28, fontWeight: 600, color: "#6B21A8" }}>~{beneficiaries} Ibu Mitra</div>
+                      <div style={{ fontSize: 13, color: "#6B7280" }}>akan terbantu mengembangkan usahanya</div>
+                    </div>
+                  </div>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+                    <div>
+                      <div style={{ fontSize: 12, color: "#8B7A9E", marginBottom: 8, fontWeight: 500 }}>Distribusi Industri</div>
+                      {industries.map(ind => (
+                        <div key={ind.name} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6, fontSize: 13 }}>
+                          <span>{ind.icon}</span>
+                          <span style={{ flex: 1 }}>{ind.name}</span>
+                          <span style={{ color: "#6B7280" }}>{ind.pct}%</span>
+                        </div>
+                      ))}
+                    </div>
+                    <div>
+                      <div style={{ fontSize: 12, color: "#8B7A9E", marginBottom: 8, fontWeight: 500 }}>Sebaran Wilayah</div>
+                      {provinces.map(p => (
+                        <div key={p.name} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6, fontSize: 13 }}>
+                          <span style={{ flex: 1 }}>{p.name}</span>
+                          <span style={{ color: "#6B7280" }}>{p.pct}%</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Safety */}
+                <div style={{ background: "#fff", border: "1px solid #F0ECF5", borderRadius: 20, padding: "28px 32px" }}>
+                  <h3 style={{ fontFamily: "Fraunces, serif", fontSize: 18, fontWeight: 600, marginBottom: 16 }}>Keamanan & Perlindungan</h3>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 16 }}>
+                    {[
+                      { icon: "✅", label: "TKB90", value: tier.tkb90 + "%", desc: "Tingkat keberhasilan" },
+                      { icon: "🛡️", label: "Risiko", value: tier.risk, desc: "Profil risiko" },
+                      { icon: "🔒", label: "Asuransi", value: "Dilindungi", desc: "Asuransi kredit" },
+                      { icon: "📋", label: "Regulasi", value: "OJK", desc: "Terdaftar & diawasi" },
+                    ].map(item => (
+                      <div key={item.label} style={{ textAlign: "center" }}>
+                        <div style={{ fontSize: 24, marginBottom: 6 }}>{item.icon}</div>
+                        <div style={{ fontSize: 12, color: "#8B7A9E" }}>{item.label}</div>
+                        <div style={{ fontWeight: 600, fontSize: 15, marginTop: 2 }}>{item.value}</div>
+                        <div style={{ fontSize: 11, color: "#9CA3AF", marginTop: 2 }}>{item.desc}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      }
+
+      /* ─── RM DASHBOARD ─── */
+      return (
+        <div style={{ height: "100vh", display: "flex", flexDirection: "column", overflow: "hidden" }}>
+          {/* Top header bar */}
+          <div style={{
+            height: 56, minHeight: 56, background: "#fff", borderBottom: "1px solid #F0ECF5",
+            display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 24px"
+          }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+              <div style={{ width: 32, height: 32, borderRadius: 8, background: "linear-gradient(135deg, #6B21A8, #9333EA)", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: 14, fontWeight: 700 }}>G</div>
+              <div>
+                <div style={{ fontFamily: "Fraunces, serif", fontSize: 15, fontWeight: 600 }}>RM Sales Toolkit</div>
+                <div style={{ fontSize: 11, color: "#9CA3AF" }}>Grassroots Growth Series</div>
+              </div>
+            </div>
+            <button
+              onClick={() => setPresentMode(true)}
+              style={{
+                background: "linear-gradient(135deg, #6B21A8, #7C3AED)", color: "#fff",
+                border: "none", borderRadius: 10, padding: "8px 20px", fontSize: 13, fontWeight: 600,
+                cursor: "pointer", display: "flex", alignItems: "center", gap: 6
+              }}
+            >
+              🖥️ Mode Presentasi
+            </button>
+          </div>
+
+          <div style={{ flex: 1, display: "flex", overflow: "hidden" }}>
+            {/* Left panel — Client & Controls */}
+            <div style={{
+              width: 300, minWidth: 300, background: "#fff", borderRight: "1px solid #F0ECF5",
+              display: "flex", flexDirection: "column", overflow: "hidden"
+            }}>
+              {/* Client info */}
+              <div style={{ padding: "20px 20px 16px", borderBottom: "1px solid #F0ECF5" }}>
+                <div style={{ fontSize: 11, fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.5, color: "#8B7A9E", marginBottom: 10 }}>Info Klien</div>
+                <input
+                  value={clientName} onChange={e => setClientName(e.target.value)}
+                  placeholder="Nama klien"
+                  style={{ width: "100%", padding: "8px 12px", borderRadius: 8, border: "1px solid #E5DEEE", fontSize: 13, marginBottom: 8, outline: "none", fontFamily: "inherit" }}
+                />
+                <input
+                  value={clientPhone} onChange={e => setClientPhone(e.target.value)}
+                  placeholder="No. telepon"
+                  style={{ width: "100%", padding: "8px 12px", borderRadius: 8, border: "1px solid #E5DEEE", fontSize: 13, marginBottom: 8, outline: "none", fontFamily: "inherit" }}
+                />
+                <textarea
+                  value={clientNotes} onChange={e => setClientNotes(e.target.value)}
+                  placeholder="Catatan..."
+                  rows={2}
+                  style={{ width: "100%", padding: "8px 12px", borderRadius: 8, border: "1px solid #E5DEEE", fontSize: 13, outline: "none", fontFamily: "inherit", resize: "vertical" }}
+                />
+              </div>
+
+              {/* Investment params */}
+              <div style={{ padding: "16px 20px", borderBottom: "1px solid #F0ECF5", flex: 1, overflowY: "auto" }}>
+                <div style={{ fontSize: 11, fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.5, color: "#8B7A9E", marginBottom: 10 }}>Parameter Investasi</div>
+
+                {/* Amount */}
+                <div style={{ marginBottom: 16 }}>
+                  <label style={{ fontSize: 12, color: "#6B7280", display: "block", marginBottom: 6 }}>Jumlah Investasi</label>
+                  <div style={{ fontFamily: "Fraunces, serif", fontSize: 20, fontWeight: 600, color: "#6B21A8", marginBottom: 8 }}>
+                    Rp {fmt(amount)}
+                  </div>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
+                    {amountChips.map(a => (
+                      <button key={a} onClick={() => setAmount(a)} style={{
+                        padding: "4px 10px", borderRadius: 6, fontSize: 11, fontWeight: 500, cursor: "pointer",
+                        border: amount === a ? `1.5px solid #6B21A8` : "1px solid #E5DEEE",
+                        background: amount === a ? "#F9F5FF" : "#fff",
+                        color: amount === a ? "#6B21A8" : "#6B7280",
+                      }}>
+                        {fmtShort(a)}
+                      </button>
+                    ))}
+                  </div>
+                  <input
+                    type="number"
+                    value={amount}
+                    onChange={e => setAmount(Math.max(0, Number(e.target.value)))}
+                    style={{ width: "100%", padding: "6px 10px", borderRadius: 6, border: "1px solid #E5DEEE", fontSize: 12, marginTop: 8, outline: "none", fontFamily: "inherit" }}
+                    placeholder="Custom amount"
+                  />
+                </div>
+
+                {/* Frequency */}
+                <div style={{ marginBottom: 16 }}>
+                  <label style={{ fontSize: 12, color: "#6B7280", display: "block", marginBottom: 6 }}>Frekuensi</label>
+                  <div style={{ display: "flex", gap: 6 }}>
+                    {[{ v: "once", l: "Sekali" }, { v: "monthly", l: "Bulanan" }].map(f => (
+                      <button key={f.v} onClick={() => setFrequency(f.v)} style={{
+                        flex: 1, padding: "7px", borderRadius: 8, fontSize: 12, fontWeight: 500, cursor: "pointer",
+                        border: frequency === f.v ? `1.5px solid #6B21A8` : "1px solid #E5DEEE",
+                        background: frequency === f.v ? "#F9F5FF" : "#fff",
+                        color: frequency === f.v ? "#6B21A8" : "#6B7280",
+                      }}>
+                        {f.l}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Duration */}
+                <div style={{ marginBottom: 16 }}>
+                  <label style={{ fontSize: 12, color: "#6B7280", display: "block", marginBottom: 6 }}>Tenor (bulan)</label>
+                  <div style={{ display: "flex", gap: 6 }}>
+                    {durations.map(d => (
+                      <button key={d} onClick={() => setDuration(d)} style={{
+                        flex: 1, padding: "7px", borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: "pointer",
+                        fontFamily: "Fraunces, serif",
+                        border: duration === d ? `1.5px solid #6B21A8` : "1px solid #E5DEEE",
+                        background: duration === d ? "#F9F5FF" : "#fff",
+                        color: duration === d ? "#6B21A8" : "#6B7280",
+                      }}>
+                        {d}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Tier selector */}
+                <div>
+                  <label style={{ fontSize: 12, color: "#6B7280", display: "block", marginBottom: 6 }}>Produk</label>
+                  {Object.entries(tiers).map(([k, t]) => (
+                    <button key={k} onClick={() => setSelectedTier(k)} style={{
+                      width: "100%", padding: "10px 12px", borderRadius: 10, marginBottom: 4,
+                      border: selectedTier === k ? `1.5px solid ${t.color}` : "1px solid #F0ECF5",
+                      background: selectedTier === k ? `${t.color}08` : "#fff",
+                      cursor: "pointer", display: "flex", alignItems: "center", gap: 10, textAlign: "left",
+                    }}>
+                      <div style={{ width: 8, height: 8, borderRadius: "50%", background: t.color, flexShrink: 0 }} />
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontSize: 13, fontWeight: 600, color: selectedTier === k ? t.color : "#1a1a1a" }}>{t.name}</div>
+                        <div style={{ fontSize: 11, color: "#9CA3AF" }}>{t.rate}% p.a. · {t.risk}</div>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Quick stats */}
+              <div style={{ padding: "14px 20px", background: "#FAFAF7", borderTop: "1px solid #F0ECF5" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, marginBottom: 4 }}>
+                  <span style={{ color: "#6B7280" }}>Keuntungan</span>
+                  <span style={{ fontWeight: 600, color: "#059669" }}>+Rp {fmt(result.totalEarnings)}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Main content area */}
+            <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
+              {/* Tab bar */}
+              <div style={{
+                display: "flex", gap: 0, background: "#fff", borderBottom: "1px solid #F0ECF5",
+                padding: "0 24px", overflow: "hidden"
+              }}>
+                {tabs.map(tab => (
+                  <button key={tab.id} onClick={() => setActiveTab(tab.id)} style={{
+                    padding: "12px 18px", fontSize: 13, fontWeight: 500, cursor: "pointer",
+                    border: "none", borderBottom: activeTab === tab.id ? `2px solid #6B21A8` : "2px solid transparent",
+                    background: "none", color: activeTab === tab.id ? "#6B21A8" : "#6B7280",
+                    display: "flex", alignItems: "center", gap: 6, whiteSpace: "nowrap",
+                  }}>
+                    <span style={{ fontSize: 14 }}>{tab.icon}</span> {tab.label}
+                  </button>
+                ))}
+              </div>
+
+              {/* Tab content */}
+              <div style={{ flex: 1, overflow: "auto", padding: 24 }}>
+                {activeTab === "simulator" && (
+                  <SimulatorTab result={result} bankResult={bankResult} tier={tier} tiers={tiers} allResults={allResults}
+                    selectedTier={selectedTier} setSelectedTier={setSelectedTier} duration={duration}
+                    amount={amount} frequency={frequency} beneficiaries={beneficiaries} />
+                )}
+                {activeTab === "comparison" && (
+                  <ComparisonTab tiers={tiers} allResults={allResults} bankResult={bankResult}
+                    amount={amount} frequency={frequency} duration={duration} selectedTier={selectedTier} setSelectedTier={setSelectedTier} />
+                )}
+                {activeTab === "suitability" && (
+                  <SuitabilityTab questions={suitabilityQuestions} answers={suitAnswers} setAnswers={setSuitAnswers}
+                    scores={suitScores} recommendation={suitRecommendation} tiers={tiers} setSelectedTier={setSelectedTier} />
+                )}
+                {activeTab === "objections" && <ObjectionsTab objections={objections} />}
+                {activeTab === "impact" && (
+                  <ImpactTab beneficiaries={beneficiaries} tier={tier} result={result} />
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    /* ─── GROWTH CHART ─── */
+    function GrowthChart({ data, bankData, color, duration, height = 180 }) {
+      const w = 600, h = height, px = 40, py = 20;
+      const maxVal = Math.max(...data.map(d => d.total), ...bankData.map(d => d.total)) * 1.08;
+      const minVal = Math.min(...data.map(d => d.invested), ...bankData.map(d => d.invested)) * 0.95;
+      const range = maxVal - minVal;
+      const x = (i) => px + (i / (data.length - 1)) * (w - px * 2);
+      const y = (v) => py + (1 - (v - minVal) / range) * (h - py * 2);
+      const line = (arr, key) => arr.map((d, i) => `${i === 0 ? "M" : "L"}${x(i)},${y(d[key])}`).join(" ");
+      const area = (arr, key) => `${line(arr, key)} L${x(arr.length-1)},${h - py} L${px},${h - py} Z`;
+
+      return (
+        <svg viewBox={`0 0 ${w} ${h}`} style={{ width: "100%", height: "auto" }}>
+          {[0.25, 0.5, 0.75].map(pct => {
+            const yy = py + (1 - pct) * (h - py * 2);
+            return <line key={pct} x1={px} y1={yy} x2={w - px} y2={yy} stroke="#F0ECF5" strokeWidth="1" />;
+          })}
+          <path d={area(data, "total")} fill={`${color}15`} />
+          <path d={line(data, "total")} fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" />
+          <path d={line(bankData, "total")} fill="none" stroke="#D1D5DB" strokeWidth="1.5" strokeDasharray="4,4" />
+          <circle cx={x(data.length-1)} cy={y(data[data.length-1].total)} r="4" fill={color} />
+          <circle cx={x(data.length-1)} cy={y(bankData[bankData.length-1].total)} r="3" fill="#D1D5DB" />
+          <text x={px} y={h - 4} fontSize="11" fill="#9CA3AF" fontFamily="DM Sans">Bln 1</text>
+          <text x={w - px} y={h - 4} fontSize="11" fill="#9CA3AF" textAnchor="end" fontFamily="DM Sans">Bln {duration}</text>
+        </svg>
+      );
+    }
+
+    /* ─── TAB: SIMULATOR ─── */
+    function SimulatorTab({ result, bankResult, tier, tiers, allResults, selectedTier, setSelectedTier, duration, amount, frequency, beneficiaries }) {
+      return (
+        <div style={{ maxWidth: 900 }}>
+          {/* Hero card */}
+          <div style={{
+            background: `linear-gradient(135deg, ${tier.color}, ${tier.color}cc)`,
+            borderRadius: 20, padding: "28px 32px", color: "#fff", marginBottom: 20,
+            position: "relative", overflow: "hidden"
+          }}>
+            <svg style={{ position: "absolute", right: -20, top: -20, opacity: 0.06 }} width="160" height="160"><circle cx="80" cy="80" r="80" fill="white"/></svg>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+              <div>
+                <div style={{ fontSize: 12, opacity: 0.8 }}>{tier.name} · {tier.rate}% p.a.</div>
+                <div style={{ fontSize: 12, opacity: 0.7, marginTop: 2 }}>
+                  Rp {fmt(amount)}{frequency === "monthly" ? "/bulan" : ""} × {duration} bulan
+                </div>
+              </div>
+              <div style={{ fontSize: 12, opacity: 0.7 }}>TKB90: {tier.tkb90}%</div>
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 20, marginTop: 20 }}>
+              <div>
+                <div style={{ fontSize: 11, opacity: 0.7 }}>Total Portfolio</div>
+                <div style={{ fontFamily: "Fraunces, serif", fontSize: 28, fontWeight: 700 }}>Rp {fmt(result.total)}</div>
+              </div>
+              <div style={{ background: "rgba(255,255,255,0.15)", borderRadius: 12, padding: "10px 14px" }}>
+                <div style={{ fontSize: 11, opacity: 0.8 }}>Keuntungan</div>
+                <div style={{ fontFamily: "Fraunces, serif", fontSize: 22, fontWeight: 600, color: "#86EFAC" }}>+Rp {fmt(result.totalEarnings)}</div>
+              </div>
+              <div style={{ background: "rgba(255,255,255,0.15)", borderRadius: 12, padding: "10px 14px" }}>
+                <div style={{ fontSize: 11, opacity: 0.8 }}>Rata-rata/bulan</div>
+                <div style={{ fontFamily: "Fraunces, serif", fontSize: 22, fontWeight: 600 }}>+Rp {fmt(result.monthlyEarning)}</div>
+              </div>
+            </div>
+          </div>
+
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
+            {/* Chart */}
+            <div style={{ background: "#fff", borderRadius: 16, padding: "22px 24px", border: "1px solid #F0ECF5" }}>
+              <h3 style={{ fontFamily: "Fraunces, serif", fontSize: 16, fontWeight: 600, marginBottom: 2 }}>Proyeksi Pertumbuhan</h3>
+              <p style={{ fontSize: 12, color: "#6B7280", marginBottom: 14 }}>vs deposito bank 2.5% p.a.</p>
+              <GrowthChart data={result.monthlyData} bankData={bankResult.monthlyData} color={tier.color} duration={duration} />
+              <div style={{ display: "flex", gap: 16, marginTop: 8, fontSize: 11, color: "#6B7280" }}>
+                <span style={{ display: "flex", alignItems: "center", gap: 4 }}><span style={{ width: 10, height: 3, borderRadius: 2, background: tier.color, display: "inline-block" }} />{tier.name}</span>
+                <span style={{ display: "flex", alignItems: "center", gap: 4 }}><span style={{ width: 10, height: 3, borderRadius: 2, background: "#D1D5DB", display: "inline-block" }} />Bank 2.5%</span>
+              </div>
+              <div style={{ marginTop: 12, background: "#F0FDF4", borderRadius: 8, padding: "8px 12px", fontSize: 12, color: "#059669" }}>
+                <strong>+Rp {fmt(result.totalEarnings - bankResult.totalEarnings)}</strong> lebih banyak dari deposito
+              </div>
+            </div>
+
+            {/* Quick compare */}
+            <div style={{ background: "#fff", borderRadius: 16, padding: "22px 24px", border: "1px solid #F0ECF5" }}>
+              <h3 style={{ fontFamily: "Fraunces, serif", fontSize: 16, fontWeight: 600, marginBottom: 12 }}>Ringkasan Produk</h3>
+              {Object.entries(tiers).map(([k, t]) => {
+                const r = allResults[k];
+                return (
+                  <div key={k} onClick={() => setSelectedTier(k)} style={{
+                    padding: "10px 12px", borderRadius: 10, marginBottom: 4, cursor: "pointer",
+                    border: selectedTier === k ? `1.5px solid ${t.color}` : "1px solid #F0ECF5",
+                    background: selectedTier === k ? `${t.color}08` : "#fff",
+                    display: "flex", alignItems: "center", justifyContent: "space-between",
+                  }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      <div style={{ width: 8, height: 8, borderRadius: "50%", background: t.color }} />
+                      <div>
+                        <div style={{ fontSize: 13, fontWeight: 600 }}>{t.name}</div>
+                        <div style={{ fontSize: 11, color: "#9CA3AF" }}>{t.rate}% · {t.risk}</div>
+                      </div>
+                    </div>
+                    <div style={{ textAlign: "right" }}>
+                      <div style={{ fontSize: 13, fontWeight: 600, color: "#059669" }}>+Rp {fmtShort(r.totalEarnings)}</div>
+                      <div style={{ fontSize: 11, color: "#9CA3AF" }}>Rp {fmtShort(r.monthlyEarning)}/bln</div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    /* ─── TAB: COMPARISON ─── */
+    function ComparisonTab({ tiers, allResults, bankResult, amount, frequency, duration, selectedTier, setSelectedTier }) {
+      return (
+        <div style={{ maxWidth: 1000 }}>
+          <h2 style={{ fontFamily: "Fraunces, serif", fontSize: 20, fontWeight: 600, marginBottom: 4 }}>Perbandingan Produk</h2>
+          <p style={{ fontSize: 13, color: "#6B7280", marginBottom: 20 }}>
+            Rp {fmt(amount)}{frequency === "monthly" ? "/bulan" : ""} × {duration} bulan
+          </p>
+
+          <div style={{ background: "#fff", borderRadius: 16, border: "1px solid #F0ECF5", overflow: "hidden" }}>
+            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+              <thead>
+                <tr style={{ background: "#FAFAF7" }}>
+                  <th style={{ textAlign: "left", padding: "12px 16px", fontWeight: 600, fontSize: 12, color: "#8B7A9E" }}>Produk</th>
+                  <th style={{ textAlign: "right", padding: "12px 16px", fontWeight: 600, fontSize: 12, color: "#8B7A9E" }}>Return p.a.</th>
+                  <th style={{ textAlign: "right", padding: "12px 16px", fontWeight: 600, fontSize: 12, color: "#8B7A9E" }}>Total Nilai</th>
+                  <th style={{ textAlign: "right", padding: "12px 16px", fontWeight: 600, fontSize: 12, color: "#8B7A9E" }}>Keuntungan</th>
+                  <th style={{ textAlign: "right", padding: "12px 16px", fontWeight: 600, fontSize: 12, color: "#8B7A9E" }}>Rata-rata/bln</th>
+                  <th style={{ textAlign: "right", padding: "12px 16px", fontWeight: 600, fontSize: 12, color: "#8B7A9E" }}>TKB90</th>
+                  <th style={{ textAlign: "right", padding: "12px 16px", fontWeight: 600, fontSize: 12, color: "#8B7A9E" }}>Risiko</th>
+                  <th style={{ textAlign: "center", padding: "12px 16px", fontWeight: 600, fontSize: 12, color: "#8B7A9E" }}>vs Bank</th>
+                  <th style={{ padding: "12px 16px" }}></th>
+                </tr>
+              </thead>
+              <tbody>
+                {Object.entries(tiers).map(([k, t]) => {
+                  const r = allResults[k];
+                  const diff = r.totalEarnings - bankResult.totalEarnings;
+                  return (
+                    <tr key={k} style={{
+                      borderTop: "1px solid #F0ECF5",
+                      background: selectedTier === k ? `${t.color}06` : "#fff",
+                    }}>
+                      <td style={{ padding: "14px 16px", display: "flex", alignItems: "center", gap: 8 }}>
+                        <div style={{ width: 10, height: 10, borderRadius: "50%", background: t.color }} />
+                        <span style={{ fontWeight: 600, color: selectedTier === k ? t.color : "#1a1a1a" }}>{t.name}</span>
+                      </td>
+                      <td style={{ textAlign: "right", padding: "14px 16px", fontWeight: 600 }}>{t.rate}%</td>
+                      <td style={{ textAlign: "right", padding: "14px 16px", fontFamily: "Fraunces, serif", fontWeight: 600 }}>Rp {fmt(r.total)}</td>
+                      <td style={{ textAlign: "right", padding: "14px 16px", fontWeight: 600, color: "#059669" }}>+Rp {fmt(r.totalEarnings)}</td>
+                      <td style={{ textAlign: "right", padding: "14px 16px", color: "#6B7280" }}>Rp {fmt(r.monthlyEarning)}</td>
+                      <td style={{ textAlign: "right", padding: "14px 16px" }}>{t.tkb90}%</td>
+                      <td style={{ textAlign: "right", padding: "14px 16px", color: "#6B7280", fontSize: 12 }}>{t.risk}</td>
+                      <td style={{ textAlign: "center", padding: "14px 16px" }}>
+                        <span style={{ background: "#F0FDF4", color: "#059669", padding: "3px 8px", borderRadius: 6, fontSize: 11, fontWeight: 600 }}>
+                          +{((diff / bankResult.totalEarnings) * 100).toFixed(0)}%
+                        </span>
+                      </td>
+                      <td style={{ padding: "14px 16px" }}>
+                        <button onClick={() => setSelectedTier(k)} style={{
+                          padding: "5px 14px", borderRadius: 8, fontSize: 12, fontWeight: 500, cursor: "pointer",
+                          border: selectedTier === k ? `1.5px solid ${t.color}` : "1px solid #E5DEEE",
+                          background: selectedTier === k ? t.color : "#fff",
+                          color: selectedTier === k ? "#fff" : "#6B7280",
+                        }}>
+                          {selectedTier === k ? "Terpilih" : "Pilih"}
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
+                {/* Bank row */}
+                <tr style={{ borderTop: "2px solid #F0ECF5", background: "#FAFAF7" }}>
+                  <td style={{ padding: "14px 16px", display: "flex", alignItems: "center", gap: 8 }}>
+                    <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#D1D5DB" }} />
+                    <span style={{ color: "#9CA3AF" }}>Deposito Bank</span>
+                  </td>
+                  <td style={{ textAlign: "right", padding: "14px 16px", color: "#9CA3AF" }}>2.5%</td>
+                  <td style={{ textAlign: "right", padding: "14px 16px", color: "#9CA3AF", fontFamily: "Fraunces, serif" }}>Rp {fmt(bankResult.total)}</td>
+                  <td style={{ textAlign: "right", padding: "14px 16px", color: "#9CA3AF" }}>+Rp {fmt(bankResult.totalEarnings)}</td>
+                  <td style={{ textAlign: "right", padding: "14px 16px", color: "#9CA3AF" }}>Rp {fmt(bankResult.monthlyEarning)}</td>
+                  <td style={{ textAlign: "right", padding: "14px 16px", color: "#9CA3AF" }}>—</td>
+                  <td style={{ textAlign: "right", padding: "14px 16px", color: "#9CA3AF", fontSize: 12 }}>Sangat Rendah</td>
+                  <td style={{ textAlign: "center", padding: "14px 16px", color: "#9CA3AF", fontSize: 11 }}>baseline</td>
+                  <td></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          {/* Visual bar comparison */}
+          <div style={{ background: "#fff", borderRadius: 16, border: "1px solid #F0ECF5", padding: "22px 24px", marginTop: 20 }}>
+            <h3 style={{ fontFamily: "Fraunces, serif", fontSize: 16, fontWeight: 600, marginBottom: 16 }}>Perbandingan Visual Keuntungan</h3>
+            {Object.entries(tiers).map(([k, t]) => {
+              const r = allResults[k];
+              const maxEarnings = allResults.dynamic.totalEarnings;
+              const pct = (r.totalEarnings / maxEarnings) * 100;
+              return (
+                <div key={k} style={{ marginBottom: 12 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, marginBottom: 4 }}>
+                    <span style={{ fontWeight: 600 }}>{t.name} ({t.rate}%)</span>
+                    <span style={{ color: "#059669", fontWeight: 600 }}>+Rp {fmt(r.totalEarnings)}</span>
+                  </div>
+                  <div style={{ height: 8, background: "#F3F0F7", borderRadius: 4, overflow: "hidden" }}>
+                    <div style={{ height: "100%", width: `${pct}%`, background: `linear-gradient(90deg, ${t.color}88, ${t.color})`, borderRadius: 4, transition: "width 0.3s" }} />
+                  </div>
+                </div>
+              );
+            })}
+            <div style={{ marginTop: 4 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, marginBottom: 4 }}>
+                <span style={{ color: "#9CA3AF" }}>Deposito Bank (2.5%)</span>
+                <span style={{ color: "#9CA3AF" }}>+Rp {fmt(bankResult.totalEarnings)}</span>
+              </div>
+              <div style={{ height: 8, background: "#F3F0F7", borderRadius: 4, overflow: "hidden" }}>
+                <div style={{ height: "100%", width: `${(bankResult.totalEarnings / allResults.dynamic.totalEarnings) * 100}%`, background: "#D1D5DB", borderRadius: 4 }} />
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    /* ─── TAB: SUITABILITY ─── */
+    function SuitabilityTab({ questions, answers, setAnswers, scores, recommendation, tiers, setSelectedTier }) {
+      return (
+        <div style={{ maxWidth: 800 }}>
+          <h2 style={{ fontFamily: "Fraunces, serif", fontSize: 20, fontWeight: 600, marginBottom: 4 }}>Profil Risiko & Kesesuaian</h2>
+          <p style={{ fontSize: 13, color: "#6B7280", marginBottom: 24 }}>Jawab pertanyaan di bawah untuk mendapat rekomendasi produk yang paling sesuai untuk klien.</p>
+
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+            {questions.map((q, qi) => (
+              <div key={q.id} style={{ background: "#fff", borderRadius: 16, border: "1px solid #F0ECF5", padding: "20px 22px" }}>
+                <div style={{ fontSize: 12, color: "#8B7A9E", marginBottom: 4 }}>Pertanyaan {qi + 1}</div>
+                <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 14 }}>{q.q}</div>
+                <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                  {q.options.map((opt, oi) => {
+                    const selected = answers[q.id] === opt.score;
+                    return (
+                      <button key={oi} onClick={() => setAnswers(prev => ({ ...prev, [q.id]: opt.score }))}
+                        style={{
+                          padding: "8px 14px", borderRadius: 8, fontSize: 13, cursor: "pointer", textAlign: "left",
+                          border: selected ? "1.5px solid #6B21A8" : "1px solid #E5DEEE",
+                          background: selected ? "#F9F5FF" : "#fff",
+                          color: selected ? "#6B21A8" : "#4B5563", fontWeight: selected ? 600 : 400,
+                        }}>
+                        {opt.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Result */}
+          {recommendation && (
+            <div style={{
+              marginTop: 24, background: `linear-gradient(135deg, ${tiers[recommendation].color}10, ${tiers[recommendation].color}05)`,
+              border: `1.5px solid ${tiers[recommendation].color}30`,
+              borderRadius: 16, padding: "24px 28px"
+            }}>
+              <div style={{ fontSize: 12, color: "#8B7A9E", marginBottom: 4, fontWeight: 500 }}>Rekomendasi Produk</div>
+              <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12 }}>
+                <div style={{ width: 14, height: 14, borderRadius: "50%", background: tiers[recommendation].color }} />
+                <span style={{ fontFamily: "Fraunces, serif", fontSize: 22, fontWeight: 600, color: tiers[recommendation].color }}>
+                  {tiers[recommendation].name}
+                </span>
+                <span style={{ fontSize: 14, color: "#6B7280" }}>— {tiers[recommendation].rate}% p.a.</span>
+              </div>
+              <p style={{ fontSize: 13, color: "#6B7280", marginBottom: 16 }}>
+                Berdasarkan profil risiko klien, produk <strong>{tiers[recommendation].name}</strong> adalah yang paling sesuai
+                dengan tingkat risiko <strong>{tiers[recommendation].risk}</strong> dan TKB90 sebesar <strong>{tiers[recommendation].tkb90}%</strong>.
+              </p>
+
+              {/* Score bars */}
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+                {Object.entries(scores).sort((a,b) => b[1] - a[1]).map(([k, v]) => {
+                  const maxScore = Math.max(...Object.values(scores), 1);
+                  return (
+                    <div key={k} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      <div style={{ width: 8, height: 8, borderRadius: "50%", background: tiers[k].color }} />
+                      <span style={{ fontSize: 12, width: 100 }}>{tiers[k].name}</span>
+                      <div style={{ flex: 1, height: 6, background: "#F3F0F7", borderRadius: 3, overflow: "hidden" }}>
+                        <div style={{ height: "100%", width: `${(v / maxScore) * 100}%`, background: tiers[k].color, borderRadius: 3 }} />
+                      </div>
+                      <span style={{ fontSize: 12, fontWeight: 600, color: tiers[k].color, width: 24, textAlign: "right" }}>{v}</span>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <button onClick={() => setSelectedTier(recommendation)} style={{
+                marginTop: 16, padding: "10px 24px", borderRadius: 10, fontSize: 13, fontWeight: 600, cursor: "pointer",
+                background: tiers[recommendation].color, color: "#fff", border: "none"
+              }}>
+                Gunakan {tiers[recommendation].name} di Simulator
+              </button>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    /* ─── TAB: OBJECTIONS ─── */
+    function ObjectionsTab({ objections }) {
+      const [openIdx, setOpenIdx] = useState(null);
+      return (
+        <div style={{ maxWidth: 700 }}>
+          <h2 style={{ fontFamily: "Fraunces, serif", fontSize: 20, fontWeight: 600, marginBottom: 4 }}>Objection Handler</h2>
+          <p style={{ fontSize: 13, color: "#6B7280", marginBottom: 20 }}>Pertanyaan umum dari calon investor dan cara menjawabnya.</p>
+
+          {objections.map((obj, i) => (
+            <div key={i} style={{
+              background: "#fff", borderRadius: 14, border: "1px solid #F0ECF5", marginBottom: 8, overflow: "hidden"
+            }}>
+              <button onClick={() => setOpenIdx(openIdx === i ? null : i)} style={{
+                width: "100%", padding: "16px 20px", background: "none", border: "none", cursor: "pointer",
+                display: "flex", alignItems: "center", justifyContent: "space-between", textAlign: "left",
+              }}>
+                <span style={{ fontSize: 14, fontWeight: 600, color: openIdx === i ? "#6B21A8" : "#1a1a1a" }}>{obj.q}</span>
+                <span style={{ fontSize: 18, color: "#9CA3AF", transform: openIdx === i ? "rotate(45deg)" : "none", transition: "0.15s" }}>+</span>
+              </button>
+              {openIdx === i && (
+                <div style={{ padding: "0 20px 16px", fontSize: 13, lineHeight: 1.7, color: "#4B5563" }}>
+                  {obj.a}
+                </div>
+              )}
+            </div>
+          ))}
+
+        </div>
+      );
+    }
+
+    /* ─── TAB: IMPACT ─── */
+    function ImpactTab({ beneficiaries, tier, result }) {
+      const stories = [
+        { name: "Ibu Ratna", loc: "Pedagang Sayur · Desa Ciomas, Bogor", avatar: "👩🏽", story: "Dengan pinjaman Rp 2,5 juta, Ibu Ratna bisa menambah variasi sayuran di warungnya. Pendapatannya naik 40% dalam 3 bulan, dan kini ia bisa mempekerjakan 1 tetangga." },
+        { name: "Ibu Sari", loc: "Peternak Ayam · Kab. Magelang", avatar: "👩🏾", story: "Pinjaman Rp 3 juta digunakan untuk menambah 50 ekor ayam. Kini produksi telurnya cukup untuk memasok 2 warung makan di kota." },
+        { name: "Ibu Dewi", loc: "Konveksi · Kab. Bandung", avatar: "👩🏽", story: "Menggunakan pinjaman Rp 5 juta untuk membeli mesin jahit kedua. Omzetnya naik 60% dan ia sudah bisa menerima pesanan seragam sekolah." },
+      ];
+
+      return (
+        <div style={{ maxWidth: 800 }}>
+          <h2 style={{ fontFamily: "Fraunces, serif", fontSize: 20, fontWeight: 600, marginBottom: 4 }}>Dampak Sosial</h2>
+          <p style={{ fontSize: 13, color: "#6B7280", marginBottom: 24 }}>Cerita dampak nyata untuk ditunjukkan ke klien saat presentasi.</p>
+
+          <div style={{
+            background: "linear-gradient(135deg, #F3E8FF, #E9D5FF)", borderRadius: 20, padding: "28px 32px", marginBottom: 24,
+            display: "flex", alignItems: "center", gap: 24
+          }}>
+            <div style={{ width: 72, height: 72, borderRadius: "50%", background: "linear-gradient(135deg, #DDD6FE, #C4B5FD)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 36, flexShrink: 0 }}>👩🏽</div>
+            <div>
+              <div style={{ fontFamily: "Fraunces, serif", fontSize: 36, fontWeight: 700, color: "#6B21A8" }}>~{beneficiaries} Ibu Mitra</div>
+              <div style={{ fontSize: 14, color: "#6B21A8", opacity: 0.8 }}>akan terbantu mengembangkan usaha mikro mereka</div>
+              <div style={{ fontSize: 12, color: "#8B7A9E", marginTop: 4 }}>Berdasarkan investasi Rp {fmt(result.totalInvested)}</div>
+            </div>
+          </div>
+
+          {/* Industry & Province grid */}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, marginBottom: 24 }}>
+            <div style={{ background: "#fff", borderRadius: 16, border: "1px solid #F0ECF5", padding: "22px 24px" }}>
+              <h3 style={{ fontFamily: "Fraunces, serif", fontSize: 16, fontWeight: 600, marginBottom: 14 }}>Distribusi Industri</h3>
+              {industries.map(ind => (
+                <div key={ind.name} style={{ marginBottom: 10 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, marginBottom: 3 }}>
+                    <span>{ind.icon} {ind.name}</span>
+                    <span style={{ color: "#6B7280" }}>{ind.pct}%</span>
+                  </div>
+                  <div style={{ height: 6, background: "#F3F0F7", borderRadius: 3, overflow: "hidden" }}>
+                    <div style={{ height: "100%", width: `${ind.pct}%`, background: `linear-gradient(90deg, ${tier.color}88, ${tier.color})`, borderRadius: 3 }} />
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div style={{ background: "#fff", borderRadius: 16, border: "1px solid #F0ECF5", padding: "22px 24px" }}>
+              <h3 style={{ fontFamily: "Fraunces, serif", fontSize: 16, fontWeight: 600, marginBottom: 14 }}>Sebaran Wilayah</h3>
+              {provinces.map(p => (
+                <div key={p.name} style={{ marginBottom: 10 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, marginBottom: 3 }}>
+                    <span>{p.name}</span>
+                    <span style={{ color: "#6B7280" }}>{p.pct}%</span>
+                  </div>
+                  <div style={{ height: 6, background: "#F3F0F7", borderRadius: 3, overflow: "hidden" }}>
+                    <div style={{ height: "100%", width: `${p.pct}%`, background: `linear-gradient(90deg, #6B21A888, #6B21A8)`, borderRadius: 3 }} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Beneficiary stories */}
+          <h3 style={{ fontFamily: "Fraunces, serif", fontSize: 16, fontWeight: 600, marginBottom: 12 }}>Cerita Penerima Manfaat</h3>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 16 }}>
+            {stories.map((s, i) => (
+              <div key={i} style={{ background: "linear-gradient(135deg, #FFFBEB, #FEF3C7)", borderRadius: 16, padding: "22px" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
+                  <div style={{ width: 40, height: 40, borderRadius: "50%", background: "linear-gradient(135deg, #FDE68A, #FCD34D)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20 }}>{s.avatar}</div>
+                  <div>
+                    <div style={{ fontWeight: 600, fontSize: 14 }}>{s.name}</div>
+                    <div style={{ fontSize: 11, color: "#92400E" }}>{s.loc}</div>
+                  </div>
+                </div>
+                <p style={{ fontSize: 13, lineHeight: 1.7, color: "#78350F" }}>{s.story}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
+    /* ─── RENDER ─── */
+    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+  </script>
+</body>
+</html>
