@@ -25,6 +25,7 @@
   const [amount, setAmount] = useState(10000);
   const [consent, setConsent] = useState(false);
   const [expandedGroup, setExpandedGroup] = useState(null);
+  const [expandedMonth, setExpandedMonth] = useState(null);
   const [divestTarget, setDivestTarget] = useState(null);
   const [editAutodebet, setEditAutodebet] = useState(null);
   const [editAmount, setEditAmount] = useState(0);
@@ -42,13 +43,47 @@
     { id: "pendidikan", name: "Celengan Pendidikan Anak", rate: 5, duration: 12, minWithdraw: "1 bulan", min: 10000, badge: null },
   ];
 
+  // Lebaran: weekly autodebet since Oct 2025 (~23 weeks) + a few lumpsum
+  // Pendidikan: monthly autodebet since Sep 2025 (~6 months) + lumpsum
   const assets = [
-    { id: 1, catalog: "lebaran", amount: 100000, profit: 1248, totalProfit: 5000, startDate: "15 Des 2025", endDate: "15 Des 2026", progress: 25 },
-    { id: 2, catalog: "lebaran", amount: 50000, profit: 416, totalProfit: 2496, startDate: "13 Jan 2026", endDate: "13 Jan 2027", progress: 17 },
-    { id: 3, catalog: "lebaran", amount: 10000, profit: 58, totalProfit: 500, startDate: "1 Feb 2026", endDate: "1 Feb 2027", progress: 12 },
-    { id: 4, catalog: "lebaran", amount: 10000, profit: 42, totalProfit: 500, startDate: "15 Feb 2026", endDate: "15 Feb 2027", progress: 8 },
-    { id: 5, catalog: "pendidikan", amount: 50000, profit: 416, totalProfit: 2496, startDate: "13 Jan 2026", endDate: "13 Jan 2027", progress: 17 },
-    { id: 6, catalog: "pendidikan", amount: 100000, profit: 832, totalProfit: 4992, startDate: "15 Des 2025", endDate: "15 Des 2026", progress: 25 },
+    // Lebaran - weekly autodebet Rp10.000
+    { id: 1, catalog: "lebaran", amount: 10000, profit: 230, totalProfit: 500, startDate: "6 Okt 2025", endDate: "6 Okt 2026", month: "Okt 2025", progress: 44 },
+    { id: 2, catalog: "lebaran", amount: 10000, profit: 224, totalProfit: 500, startDate: "13 Okt 2025", endDate: "13 Okt 2026", month: "Okt 2025", progress: 42 },
+    { id: 3, catalog: "lebaran", amount: 10000, profit: 218, totalProfit: 500, startDate: "20 Okt 2025", endDate: "20 Okt 2026", month: "Okt 2025", progress: 40 },
+    { id: 4, catalog: "lebaran", amount: 10000, profit: 212, totalProfit: 500, startDate: "27 Okt 2025", endDate: "27 Okt 2026", month: "Okt 2025", progress: 38 },
+    { id: 5, catalog: "lebaran", amount: 10000, profit: 200, totalProfit: 500, startDate: "3 Nov 2025", endDate: "3 Nov 2026", month: "Nov 2025", progress: 36 },
+    { id: 6, catalog: "lebaran", amount: 10000, profit: 194, totalProfit: 500, startDate: "10 Nov 2025", endDate: "10 Nov 2026", month: "Nov 2025", progress: 35 },
+    { id: 7, catalog: "lebaran", amount: 10000, profit: 188, totalProfit: 500, startDate: "17 Nov 2025", endDate: "17 Nov 2026", month: "Nov 2025", progress: 33 },
+    { id: 8, catalog: "lebaran", amount: 10000, profit: 182, totalProfit: 500, startDate: "24 Nov 2025", endDate: "24 Nov 2026", month: "Nov 2025", progress: 31 },
+    { id: 9, catalog: "lebaran", amount: 10000, profit: 170, totalProfit: 500, startDate: "1 Des 2025", endDate: "1 Des 2026", month: "Des 2025", progress: 29 },
+    { id: 10, catalog: "lebaran", amount: 10000, profit: 164, totalProfit: 500, startDate: "8 Des 2025", endDate: "8 Des 2026", month: "Des 2025", progress: 27 },
+    { id: 11, catalog: "lebaran", amount: 10000, profit: 158, totalProfit: 500, startDate: "15 Des 2025", endDate: "15 Des 2026", month: "Des 2025", progress: 25 },
+    { id: 12, catalog: "lebaran", amount: 10000, profit: 152, totalProfit: 500, startDate: "22 Des 2025", endDate: "22 Des 2026", month: "Des 2025", progress: 23 },
+    { id: 13, catalog: "lebaran", amount: 10000, profit: 146, totalProfit: 500, startDate: "29 Des 2025", endDate: "29 Des 2026", month: "Des 2025", progress: 22 },
+    { id: 14, catalog: "lebaran", amount: 10000, profit: 134, totalProfit: 500, startDate: "5 Jan 2026", endDate: "5 Jan 2027", month: "Jan 2026", progress: 19 },
+    { id: 15, catalog: "lebaran", amount: 10000, profit: 128, totalProfit: 500, startDate: "12 Jan 2026", endDate: "12 Jan 2027", month: "Jan 2026", progress: 17 },
+    { id: 16, catalog: "lebaran", amount: 10000, profit: 122, totalProfit: 500, startDate: "19 Jan 2026", endDate: "19 Jan 2027", month: "Jan 2026", progress: 15 },
+    { id: 17, catalog: "lebaran", amount: 10000, profit: 116, totalProfit: 500, startDate: "26 Jan 2026", endDate: "26 Jan 2027", month: "Jan 2026", progress: 13 },
+    { id: 18, catalog: "lebaran", amount: 10000, profit: 104, totalProfit: 500, startDate: "2 Feb 2026", endDate: "2 Feb 2027", month: "Feb 2026", progress: 11 },
+    { id: 19, catalog: "lebaran", amount: 10000, profit: 98, totalProfit: 500, startDate: "9 Feb 2026", endDate: "9 Feb 2027", month: "Feb 2026", progress: 9 },
+    { id: 20, catalog: "lebaran", amount: 10000, profit: 92, totalProfit: 500, startDate: "16 Feb 2026", endDate: "16 Feb 2027", month: "Feb 2026", progress: 7 },
+    { id: 21, catalog: "lebaran", amount: 10000, profit: 86, totalProfit: 500, startDate: "23 Feb 2026", endDate: "23 Feb 2027", month: "Feb 2026", progress: 6 },
+    { id: 22, catalog: "lebaran", amount: 10000, profit: 68, totalProfit: 500, startDate: "2 Mar 2026", endDate: "2 Mar 2027", month: "Mar 2026", progress: 3 },
+    { id: 23, catalog: "lebaran", amount: 10000, profit: 52, totalProfit: 500, startDate: "9 Mar 2026", endDate: "9 Mar 2027", month: "Mar 2026", progress: 1 },
+    // Lebaran - lumpsum investments
+    { id: 24, catalog: "lebaran", amount: 100000, profit: 1248, totalProfit: 5000, startDate: "15 Okt 2025", endDate: "15 Okt 2026", month: "Okt 2025", progress: 42 },
+    { id: 25, catalog: "lebaran", amount: 500000, profit: 4160, totalProfit: 25000, startDate: "1 Des 2025", endDate: "1 Des 2026", month: "Des 2025", progress: 29 },
+    // Pendidikan - monthly autodebet Rp50.000
+    { id: 26, catalog: "pendidikan", amount: 50000, profit: 1250, totalProfit: 2500, startDate: "1 Sep 2025", endDate: "1 Sep 2026", month: "Sep 2025", progress: 53 },
+    { id: 27, catalog: "pendidikan", amount: 50000, profit: 1040, totalProfit: 2500, startDate: "1 Okt 2025", endDate: "1 Okt 2026", month: "Okt 2025", progress: 44 },
+    { id: 28, catalog: "pendidikan", amount: 50000, profit: 832, totalProfit: 2500, startDate: "1 Nov 2025", endDate: "1 Nov 2026", month: "Nov 2025", progress: 36 },
+    { id: 29, catalog: "pendidikan", amount: 50000, profit: 624, totalProfit: 2500, startDate: "1 Des 2025", endDate: "1 Des 2026", month: "Des 2025", progress: 29 },
+    { id: 30, catalog: "pendidikan", amount: 50000, profit: 416, totalProfit: 2500, startDate: "1 Jan 2026", endDate: "1 Jan 2027", month: "Jan 2026", progress: 19 },
+    { id: 31, catalog: "pendidikan", amount: 50000, profit: 208, totalProfit: 2500, startDate: "1 Feb 2026", endDate: "1 Feb 2027", month: "Feb 2026", progress: 11 },
+    { id: 32, catalog: "pendidikan", amount: 50000, profit: 52, totalProfit: 2500, startDate: "1 Mar 2026", endDate: "1 Mar 2027", month: "Mar 2026", progress: 2 },
+    // Pendidikan - lumpsum
+    { id: 33, catalog: "pendidikan", amount: 200000, profit: 2500, totalProfit: 10000, startDate: "15 Okt 2025", endDate: "15 Okt 2026", month: "Okt 2025", progress: 42 },
+    { id: 34, catalog: "pendidikan", amount: 100000, profit: 832, totalProfit: 5000, startDate: "20 Des 2025", endDate: "20 Des 2026", month: "Des 2025", progress: 24 },
   ];
 
   const formatRp = (n) => "Rp" + Math.round(n).toLocaleString("id-ID");
@@ -403,26 +438,61 @@
                       </div>
                     </button>
 
-                    {isExpanded && (
-                      <div style={{ background: "white", borderRadius: "0 0 16px 16px", border: "1.5px solid #F0F0F0", borderTop: "none" }}>
-                        {/* Individual assets */}
-                        {groupAssets.map((asset, idx) => (
-                          <div key={asset.id} style={{ padding: "16px 20px", borderBottom: idx < groupAssets.length - 1 ? "1px solid #F0F0F0" : "none" }}>
-                            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
-                              <div style={{ fontSize: 15, fontWeight: 700, color: "#1a1a1a" }}>{formatRp(asset.amount)}</div>
-                              <div style={{ fontSize: 13, fontWeight: 600, color: "#00895E" }}>+{formatRp(asset.profit)}/{formatRp(asset.totalProfit)}</div>
-                            </div>
-                            <div style={{ height: 5, borderRadius: 3, background: "#F0F0F0", marginBottom: 8, overflow: "hidden" }}>
-                              <div style={{ height: "100%", width: `${asset.progress}%`, borderRadius: 3, background: "linear-gradient(90deg, #7C3AED, #A855F7)" }} />
-                            </div>
-                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                              <div style={{ fontSize: 12, color: "#9CA3AF", fontWeight: 500 }}>{asset.startDate} - {asset.endDate}</div>
-                              <button onClick={() => setDivestTarget(asset.id)} style={{ padding: "5px 12px", borderRadius: 8, border: "1.5px solid #E5E7EB", background: "white", fontSize: 12, fontWeight: 700, color: "#6B7280", cursor: "pointer", fontFamily: "'Nunito', sans-serif" }}>Tarik Dana</button>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
+                    {isExpanded && (() => {
+                      const monthGroups = {};
+                      groupAssets.forEach(a => {
+                        if (!monthGroups[a.month]) monthGroups[a.month] = [];
+                        monthGroups[a.month].push(a);
+                      });
+                      const monthEntries = Object.entries(monthGroups);
+                      return (
+                        <div style={{ background: "white", borderRadius: "0 0 16px 16px", border: "1.5px solid #F0F0F0", borderTop: "none" }}>
+                          {monthEntries.map(([month, monthAssets], mIdx) => {
+                            const monthTotal = monthAssets.reduce((s, a) => s + a.amount, 0);
+                            const monthProfit = monthAssets.reduce((s, a) => s + a.profit, 0);
+                            const monthKey = `${catalogId}-${month}`;
+                            const isMonthExpanded = expandedMonth === monthKey;
+                            return (
+                              <div key={month}>
+                                <button onClick={() => setExpandedMonth(isMonthExpanded ? null : monthKey)} style={{
+                                  width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between",
+                                  padding: "14px 20px", background: isMonthExpanded ? "#FAFBFF" : "white", border: "none", cursor: "pointer",
+                                  borderBottom: mIdx < monthEntries.length - 1 || isMonthExpanded ? "1px solid #F0F0F0" : "none",
+                                  fontFamily: "'Nunito', sans-serif",
+                                }}>
+                                  <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" strokeWidth="2.5" strokeLinecap="round" style={{ transform: isMonthExpanded ? "rotate(90deg)" : "rotate(0deg)", transition: "transform 0.2s", flexShrink: 0 }}><path d="M9 18l6-6-6-6"/></svg>
+                                    <div style={{ textAlign: "left" }}>
+                                      <div style={{ fontSize: 13, fontWeight: 700, color: "#1a1a1a" }}>{month}</div>
+                                      <div style={{ fontSize: 12, color: "#9CA3AF", fontWeight: 500 }}>{monthAssets.length} aset</div>
+                                    </div>
+                                  </div>
+                                  <div style={{ textAlign: "right" }}>
+                                    <div style={{ fontSize: 14, fontWeight: 700, color: "#1a1a1a" }}>{formatRp(monthTotal)}</div>
+                                    <div style={{ fontSize: 12, fontWeight: 600, color: "#00895E" }}>+{formatRp(monthProfit)}</div>
+                                  </div>
+                                </button>
+                                {isMonthExpanded && monthAssets.map((asset, idx) => (
+                                  <div key={asset.id} style={{ padding: "14px 20px 14px 44px", borderBottom: idx < monthAssets.length - 1 ? "1px solid #F5F5F5" : mIdx < monthEntries.length - 1 ? "1px solid #F0F0F0" : "none", background: "#FAFBFF" }}>
+                                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
+                                      <div style={{ fontSize: 14, fontWeight: 700, color: "#1a1a1a" }}>{formatRp(asset.amount)}</div>
+                                      <div style={{ fontSize: 12, fontWeight: 600, color: "#00895E" }}>+{formatRp(asset.profit)}</div>
+                                    </div>
+                                    <div style={{ height: 4, borderRadius: 2, background: "#F0F0F0", marginBottom: 6, overflow: "hidden" }}>
+                                      <div style={{ height: "100%", width: `${asset.progress}%`, borderRadius: 2, background: "linear-gradient(90deg, #7C3AED, #A855F7)" }} />
+                                    </div>
+                                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                      <div style={{ fontSize: 11, color: "#9CA3AF", fontWeight: 500 }}>{asset.startDate} → {asset.endDate}</div>
+                                      <button onClick={() => setDivestTarget(asset.id)} style={{ padding: "4px 10px", borderRadius: 7, border: "1.5px solid #E5E7EB", background: "white", fontSize: 11, fontWeight: 700, color: "#6B7280", cursor: "pointer", fontFamily: "'Nunito', sans-serif" }}>Tarik</button>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      );
+                    })()}
                   </div>
                 );
               })}
