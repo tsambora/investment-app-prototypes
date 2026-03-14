@@ -145,7 +145,7 @@
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={screen === "home" || screen === "portfolio" ? "white" : "#1a1a1a"} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
           </button>
           <span style={{ fontSize: 17, fontWeight: 700, color: screen === "home" || screen === "portfolio" ? "white" : "#1a1a1a" }}>
-            {screen === "home" ? "Celengan" : screen === "portfolio" ? "Semua aset" : screen === "catalog" ? catalog?.name : screen === "autodebet-setup" ? "Penanaman Otomatis" : screen === "confirm" ? "Konfirmasi" : "Celengan"}
+            {screen === "home" ? "Celengan" : screen === "portfolio" ? "Semua aset" : screen === "catalog" ? catalog?.name : screen === "autodebet-setup" ? "Penanaman Terjadwal" : screen === "confirm" ? "Konfirmasi" : "Celengan"}
           </span>
         </div>
       </div>
@@ -208,18 +208,58 @@
           <>
             <div style={{ padding: "16px 20px 0" }}>
               <div style={{ background: "#F5F5F5", borderRadius: 12, padding: 4, display: "flex", gap: 4 }}>
-                {[{ key: "autodebet", label: "\u{1F331} Otomatis" }, { key: "lumpsum", label: "Sekali bayar" }].map((m) => (
+                {[{ key: "autodebet", label: "\u{1F331} Terjadwal" }, { key: "lumpsum", label: "Sekali bayar" }].map((m) => (
                   <button key={m.key} onClick={() => { setMode(m.key); if (m.key === "autodebet") { setPeriod("monthly"); setAmount(50000); } else setAmount(50000); }}
                     style={{ flex: 1, padding: "10px 8px", borderRadius: 10, border: "none", background: mode === m.key ? "white" : "transparent", boxShadow: mode === m.key ? "0 1px 3px rgba(0,0,0,0.1)" : "none", fontSize: 14, fontWeight: 700, color: mode === m.key ? "#1a1a1a" : "#9CA3AF", cursor: "pointer", fontFamily: "'Nunito', sans-serif" }}>{m.label}</button>
                 ))}
               </div>
             </div>
+            {mode === "autodebet" && (
+              <div style={{ padding: "16px 20px 0" }}>
+                <div style={{ background: "white", borderRadius: 16, padding: "20px", border: "1.5px solid #F0F0F0" }}>
+                  <div style={{ fontSize: 16, fontWeight: 800, color: "#1a1a1a", marginBottom: 16 }}>Kenapa nabung terjadwal?</div>
+
+                  {/* USP 1: Simple math */}
+                  <div style={{ display: "flex", gap: 14, marginBottom: 18 }}>
+                    <div style={{ width: 44, height: 44, borderRadius: 12, background: "#F0FDF4", border: "1.5px solid #D1FAE5", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, flexShrink: 0 }}>{"\u{1F4B0}"}</div>
+                    <div>
+                      <div style={{ fontSize: 14, fontWeight: 700, color: "#1a1a1a", marginBottom: 4 }}>Receh jadi rejeki</div>
+                      <div style={{ fontSize: 13, color: "#6B7280", fontWeight: 500, lineHeight: 1.6 }}>
+                        Sisihkan <strong style={{ color: "#1a1a1a" }}>Rp10rb/minggu</strong>, setahun kumpul jadi <strong style={{ color: "#00895E" }}>Rp520rb + untung Rp26rb</strong>. Nggak kerasa kan?
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* USP 2: No need to remember */}
+                  <div style={{ display: "flex", gap: 14, marginBottom: 18 }}>
+                    <div style={{ width: 44, height: 44, borderRadius: 12, background: "#F5F0FF", border: "1.5px solid #DDD6FE", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, flexShrink: 0 }}>{"\u{1F64C}"}</div>
+                    <div>
+                      <div style={{ fontSize: 14, fontWeight: 700, color: "#1a1a1a", marginBottom: 4 }}>Tinggal duduk manis</div>
+                      <div style={{ fontSize: 13, color: "#6B7280", fontWeight: 500, lineHeight: 1.6 }}>
+                        Nggak perlu ingat-ingat kapan harus nabung. Uang dari Poket <strong style={{ color: "#1a1a1a" }}>terjadwal ditanam tiap minggu atau bulan</strong>.
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* USP 3: Safe, no penalty */}
+                  <div style={{ display: "flex", gap: 14 }}>
+                    <div style={{ width: 44, height: 44, borderRadius: 12, background: "#FEF3C7", border: "1.5px solid #FDE68A", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, flexShrink: 0 }}>{"\u{1F6E1}\uFE0F"}</div>
+                    <div>
+                      <div style={{ fontSize: 14, fontWeight: 700, color: "#1a1a1a", marginBottom: 4 }}>Aman, nggak ada denda</div>
+                      <div style={{ fontSize: 13, color: "#6B7280", fontWeight: 500, lineHeight: 1.6 }}>
+                        Saldo Poket kosong? Tenang, <strong style={{ color: "#1a1a1a" }}>nggak kena penalti</strong>. Lanjut lagi begitu diisi.
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
             {mode === "autodebet" && autodebets[selectedCatalog] && (
               <div style={{ padding: "12px 20px 0" }}>
                 <div style={{ background: "#F5F0FF", borderRadius: 12, padding: "12px 16px", border: "1.5px solid #DDD6FE", display: "flex", alignItems: "center", gap: 10 }}>
                   <span style={{ fontSize: 14 }}>{"\u2139\uFE0F"}</span>
                   <div style={{ fontSize: 13, color: "#6D28D9", fontWeight: 600, lineHeight: 1.5 }}>
-                    Kamu sudah punya penanaman otomatis {formatRp(autodebets[selectedCatalog].amount)}{periodLabelPer(autodebets[selectedCatalog].period)}. Lanjutkan untuk mengubah jumlahnya.
+                    Kamu sudah punya penanaman terjadwal {formatRp(autodebets[selectedCatalog].amount)}{periodLabelPer(autodebets[selectedCatalog].period)}. Lanjutkan untuk mengubah jumlahnya.
                   </div>
                 </div>
               </div>
@@ -243,7 +283,7 @@
             <div style={{ padding: "16px 20px 0" }}>
               <div style={{ background: "white", borderRadius: 16, padding: "20px", border: "1.5px solid #F0F0F0" }}>
                 <div style={{ fontSize: 15, fontWeight: 700, color: "#1a1a1a", marginBottom: 4 }}>Nominal</div>
-                {mode === "autodebet" && <div style={{ fontSize: 12, color: "#9CA3AF", fontWeight: 500, marginBottom: 12 }}>Jumlah yang ditanam otomatis per {periodLabel(period)}</div>}
+                {mode === "autodebet" && <div style={{ fontSize: 12, color: "#9CA3AF", fontWeight: 500, marginBottom: 12 }}>Jumlah yang ditanam terjadwal per {periodLabel(period)}</div>}
                 <div style={{ fontSize: 28, fontWeight: 800, color: amount > 0 ? "#1a1a1a" : "#D1D5DB", marginBottom: 14 }}>{formatRp(amount)}</div>
                 <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
                   {(mode === "autodebet" ? (period === "weekly" ? [10000, 20000, 50000] : [50000, 100000, 200000]) : [50000, 100000, 500000, 1000000]).map((opt) => (
@@ -285,7 +325,7 @@
               <div style={{ background: "white", borderRadius: 16, padding: "22px", border: "1.5px solid #F0F0F0" }}>
                 <div style={{ fontSize: 15, fontWeight: 700, color: "#1a1a1a", marginBottom: 18 }}>Cara kerja</div>
                 <div style={{ display: "flex", flexDirection: "column" }}>
-                  {[{ icon: "\u{1F4B3}", title: "Isi saldo Poket", desc: "Top up Poket seperti biasa" }, { icon: "\u{1F331}", title: "Otomatis ditanam", desc: `${formatRp(amount)}${periodLabelPer(period)} masuk ke ${catalog.name}` }, { icon: "\u{1F333}", title: "Celenganmu tumbuh", desc: `Dapat bagi hasil ${catalog.rate}%/tahun` }].map((s, i) => (
+                  {[{ icon: "\u{1F4B3}", title: "Isi saldo Poket", desc: "Top up Poket seperti biasa" }, { icon: "\u{1F331}", title: "Terjadwal ditanam", desc: `${formatRp(amount)}${periodLabelPer(period)} masuk ke ${catalog.name}` }, { icon: "\u{1F333}", title: "Celenganmu tumbuh", desc: `Dapat bagi hasil ${catalog.rate}%/tahun` }].map((s, i) => (
                     <div key={i} style={{ display: "flex", gap: 14, position: "relative" }}>
                       {i < 2 && <div style={{ position: "absolute", left: 19, top: 42, width: 2, height: 28, background: "#E5E7EB" }} />}
                       <div style={{ width: 40, height: 40, borderRadius: 12, flexShrink: 0, background: "#F9FAFB", border: "1.5px solid #E5E7EB", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, zIndex: 1 }}>{s.icon}</div>
@@ -310,11 +350,11 @@
               <div style={{ background: "white", borderRadius: 16, padding: "20px", border: "1.5px solid #F0F0F0" }}>
                 <button onClick={() => setConsent(!consent)} style={{ display: "flex", alignItems: "flex-start", gap: 12, width: "100%", background: consent ? "#F5F0FF" : "#F9FAFB", border: consent ? "1.5px solid #DDD6FE" : "1.5px solid #E5E7EB", borderRadius: 14, padding: "16px", cursor: "pointer", textAlign: "left" }}>
                   <div style={{ width: 22, height: 22, borderRadius: 6, flexShrink: 0, background: consent ? "#7C3AED" : "white", border: consent ? "none" : "2px solid #D1D5DB", display: "flex", alignItems: "center", justifyContent: "center" }}>{consent && <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>}</div>
-                  <div style={{ fontSize: 13, fontWeight: 600, color: "#374151", lineHeight: 1.6 }}>Saya setuju saldo Poket disisihkan otomatis {formatRp(amount)}{periodLabelPer(period)} untuk {catalog.name}</div>
+                  <div style={{ fontSize: 13, fontWeight: 600, color: "#374151", lineHeight: 1.6 }}>Saya setuju saldo Poket disisihkan terjadwal {formatRp(amount)}{periodLabelPer(period)} untuk {catalog.name}</div>
                 </button>
                 <div style={{ marginTop: 14, display: "flex", alignItems: "flex-start", gap: 8, padding: "12px 14px", background: "#FFFBEB", borderRadius: 10, border: "1px solid #FDE68A" }}>
                   <span style={{ fontSize: 14, flexShrink: 0 }}>{"\u{1F4A1}"}</span>
-                  <div style={{ fontSize: 12, color: "#92400E", fontWeight: 500, lineHeight: 1.6 }}>Kalau saldo Poket kosong, penanaman otomatis akan dilanjutkan begitu kamu isi ulang. Nggak ada denda atau penalti.</div>
+                  <div style={{ fontSize: 12, color: "#92400E", fontWeight: 500, lineHeight: 1.6 }}>Kalau saldo Poket kosong, penanaman terjadwal akan dilanjutkan begitu kamu isi ulang. Nggak ada denda atau penalti.</div>
                 </div>
               </div>
             </div>
@@ -331,7 +371,7 @@
               </div>
               <div style={{ fontSize: 15, fontWeight: 700, color: "#1a1a1a", marginBottom: 14 }}>Rincian Investasi</div>
               <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 8 }}>
-                {[{ l: "Kategori", v: catalog.name }, { l: "Jangka Waktu", v: `${catalog.duration} bulan` }, ...(mode === "autodebet" ? [{ l: "Mode", v: `Penanaman Otomatis (${period === "weekly" ? "Mingguan" : "Bulanan"})` }] : [])].map((r, i) => (
+                {[{ l: "Kategori", v: catalog.name }, { l: "Jangka Waktu", v: `${catalog.duration} bulan` }, ...(mode === "autodebet" ? [{ l: "Mode", v: `Penanaman Terjadwal (${period === "weekly" ? "Mingguan" : "Bulanan"})` }] : [])].map((r, i) => (
                   <div key={i} style={{ display: "flex", justifyContent: "space-between", fontSize: 14 }}><span style={{ color: "#6B7280", fontWeight: 500 }}>{r.l}</span><span style={{ fontWeight: 700, color: "#1a1a1a" }}>{r.v}</span></div>
                 ))}
               </div>
@@ -349,16 +389,16 @@
         {screen === "success" && (
           <div style={{ padding: "40px 20px", textAlign: "center" }}>
             <div style={{ width: 80, height: 80, borderRadius: "50%", margin: "0 auto 20px", background: "#F0FDF4", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 40, border: "3px solid #BBF7D0" }}>{"\u2705"}</div>
-            <div style={{ fontSize: 22, fontWeight: 800, color: "#1a1a1a", marginBottom: 8 }}>{mode === "autodebet" ? "Penanaman otomatis aktif!" : "Investasi berhasil!"}</div>
+            <div style={{ fontSize: 22, fontWeight: 800, color: "#1a1a1a", marginBottom: 8 }}>{mode === "autodebet" ? "Penanaman terjadwal aktif!" : "Investasi berhasil!"}</div>
             <div style={{ fontSize: 14, color: "#6B7280", fontWeight: 500, lineHeight: 1.6, marginBottom: 28, padding: "0 16px" }}>
-              {mode === "autodebet" ? `Mulai ${period === "weekly" ? "Senin depan" : "tanggal 1 bulan depan"}, ${formatRp(amount)} akan otomatis ditanam dari Poketmu setiap ${periodLabel(period)} ke ${catalog?.name}. Kelola di halaman Semua Aset.` : `${formatRp(amount)} telah diinvestasikan ke ${catalog?.name}.`}
+              {mode === "autodebet" ? `Mulai ${period === "weekly" ? "Senin depan" : "tanggal 1 bulan depan"}, ${formatRp(amount)} akan ditanam terjadwal dari Poketmu setiap ${periodLabel(period)} ke ${catalog?.name}. Kelola di halaman Semua Aset.` : `${formatRp(amount)} telah diinvestasikan ke ${catalog?.name}.`}
             </div>
             <div style={{ background: "white", borderRadius: 16, padding: "18px 20px", border: "1.5px solid #F0F0F0", textAlign: "left", display: "flex", flexDirection: "column", gap: 12 }}>
               {[{ label: "Kategori", value: catalog?.name }, { label: mode === "autodebet" ? `Ditanam per ${periodLabel(period)}` : "Nominal", value: formatRp(amount) }, { label: mode === "autodebet" ? "Frekuensi" : "Jangka waktu", value: mode === "autodebet" ? (period === "weekly" ? "Mingguan" : "Bulanan") : `${catalog?.duration} bulan` }, { label: "Jangka waktu", value: `${catalog?.duration} bulan` }, { label: "Keuntungan", value: `${catalog?.rate}% per tahun` }].map((row, i) => (
                 <div key={i} style={{ display: "flex", justifyContent: "space-between", fontSize: 14 }}><span style={{ color: "#6B7280", fontWeight: 500 }}>{row.label}</span><span style={{ fontWeight: 700, color: "#1a1a1a" }}>{row.value}</span></div>
               ))}
             </div>
-            {mode === "autodebet" && <div style={{ marginTop: 16, background: "#FFFBEB", borderRadius: 12, padding: "14px 16px", border: "1px solid #FDE68A", fontSize: 13, color: "#92400E", fontWeight: 500, lineHeight: 1.6, textAlign: "left" }}>{"\u261D\uFE0F"} Pastikan saldo Poketmu selalu terisi setiap {period === "weekly" ? "Senin" : "tanggal 1"} supaya penanaman otomatis nggak terlewat!</div>}
+            {mode === "autodebet" && <div style={{ marginTop: 16, background: "#FFFBEB", borderRadius: 12, padding: "14px 16px", border: "1px solid #FDE68A", fontSize: 13, color: "#92400E", fontWeight: 500, lineHeight: 1.6, textAlign: "left" }}>{"\u261D\uFE0F"} Pastikan saldo Poketmu selalu terisi setiap {period === "weekly" ? "Senin" : "tanggal 1"} supaya penanaman terjadwal nggak terlewat!</div>}
           </div>
         )}
 
@@ -374,41 +414,49 @@
 
               {/* Autodebet summary card */}
               <div style={{ background: "white", borderRadius: 16, padding: "16px 18px", marginBottom: 16, border: "1.5px solid #F0F0F0" }}>
-                <div style={{ fontSize: 12, fontWeight: 700, color: "#9CA3AF", marginBottom: 14, letterSpacing: 0.5, textTransform: "uppercase" }}>Penanaman Otomatis</div>
+                <div style={{ fontSize: 12, fontWeight: 700, color: "#9CA3AF", marginBottom: 14, letterSpacing: 0.5, textTransform: "uppercase" }}>Penanaman Terjadwal</div>
                 <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 14 }}>
                   {Object.entries(autodebets).map(([catId, ad]) => {
                     const cat = catalogs.find(c => c.id === catId);
                     return (
                       <div key={catId} style={{ background: ad.active ? "#FAFFF9" : "#FAFAFA", borderRadius: 12, padding: "14px 14px", border: ad.active ? "1.5px solid #D1FAE5" : "1.5px solid #F0F0F0" }}>
-                        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
-                          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                            <span style={{ fontSize: 14 }}>{ad.active ? "\u{1F331}" : "\u23F8\uFE0F"}</span>
-                            <span style={{ fontSize: 13, color: "#374151", fontWeight: 700 }}>{cat?.name}</span>
-                          </div>
-                          <button onClick={() => toggleAutodebet(catId)} style={{ width: 44, height: 24, borderRadius: 12, border: "none", cursor: "pointer", background: ad.active ? "#16A34A" : "#D1D5DB", position: "relative", padding: 0 }}>
-                            <div style={{ width: 20, height: 20, borderRadius: "50%", background: "white", position: "absolute", top: 2, left: ad.active ? 22 : 2, transition: "left 0.2s", boxShadow: "0 1px 3px rgba(0,0,0,0.2)" }} />
-                          </button>
+                        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
+                          <span style={{ fontSize: 14 }}>{ad.active ? "\u{1F331}" : "\u23F8\uFE0F"}</span>
+                          <span style={{ fontSize: 13, color: "#374151", fontWeight: 700, flex: 1 }}>{cat?.name}</span>
+                          {ad.active && <span style={{ fontSize: 11, fontWeight: 700, color: "#16A34A", background: "#F0FDF4", padding: "3px 10px", borderRadius: 20, border: "1px solid #D1FAE5" }}>Aktif</span>}
+                          {!ad.active && <span style={{ fontSize: 11, fontWeight: 700, color: "#92400E", background: "#FFFBEB", padding: "3px 10px", borderRadius: 20, border: "1px solid #FDE68A" }}>Dijeda</span>}
                         </div>
-                        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                            <span style={{ fontSize: 14, fontWeight: 700, color: ad.active ? "#16A34A" : "#9CA3AF" }}>{formatRp(ad.amount)}{periodLabelPer(ad.period)}</span>
-                            <span style={{ fontSize: 12, color: "#9CA3AF", fontWeight: 500 }}>({ad.period === "weekly" ? "Senin" : "Tgl 1"})</span>
-                          </div>
-                          <button onClick={() => { setEditAutodebet(catId); setEditAmount(ad.amount); setEditPeriod(ad.period); }} style={{ padding: "5px 14px", borderRadius: 8, border: "1.5px solid #E5E7EB", background: "white", fontSize: 12, fontWeight: 700, color: "#7C3AED", cursor: "pointer", fontFamily: "'Nunito', sans-serif" }}>Ubah</button>
+                        <div style={{ fontSize: 14, fontWeight: 700, color: ad.active ? "#16A34A" : "#9CA3AF", marginBottom: 12 }}>
+                          {formatRp(ad.amount)}{periodLabelPer(ad.period)} <span style={{ fontSize: 12, color: "#9CA3AF", fontWeight: 500 }}>({ad.period === "weekly" ? "Senin" : "Tgl 1"})</span>
                         </div>
-                        {!ad.active && <div style={{ marginTop: 8, fontSize: 12, color: "#92400E", fontWeight: 500, background: "#FFFBEB", borderRadius: 8, padding: "6px 10px", border: "1px solid #FDE68A" }}>{"\u23F8\uFE0F"} Dijeda — ketuk toggle untuk melanjutkan</div>}
+                        <div style={{ display: "flex", gap: 8 }}>
+                          {ad.active ? (
+                            <button onClick={() => toggleAutodebet(catId)} style={{ flex: 1, padding: "10px", borderRadius: 10, border: "1.5px solid #FDE68A", background: "#FFFBEB", fontSize: 13, fontWeight: 700, color: "#92400E", cursor: "pointer", fontFamily: "'Nunito', sans-serif" }}>Jeda</button>
+                          ) : (
+                            <button onClick={() => toggleAutodebet(catId)} style={{ flex: 1, padding: "10px", borderRadius: 10, border: "none", background: "#16A34A", fontSize: 13, fontWeight: 700, color: "white", cursor: "pointer", fontFamily: "'Nunito', sans-serif" }}>Lanjutkan</button>
+                          )}
+                          <button onClick={() => { setEditAutodebet(catId); setEditAmount(ad.amount); setEditPeriod(ad.period); }} style={{ flex: 1, padding: "10px", borderRadius: 10, border: "1.5px solid #E5E7EB", background: "white", fontSize: 13, fontWeight: 700, color: "#7C3AED", cursor: "pointer", fontFamily: "'Nunito', sans-serif" }}>Ubah</button>
+                        </div>
                       </div>
                     );
                   })}
                 </div>
-                <div style={{ borderTop: "1px solid #F0F0F0", paddingTop: 10, display: "flex", justifyContent: "space-between", fontSize: 13 }}>
-                  <span style={{ color: "#6B7280", fontWeight: 500 }}>Total per bulan</span>
-                  <span style={{ fontWeight: 800, color: "#1a1a1a" }}>{formatRp(Math.round(totalMonthlyAutodebet))}</span>
-                </div>
-                <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, marginTop: 6 }}>
-                  <span style={{ color: "#6B7280", fontWeight: 500 }}>Saldo Poket cukup</span>
-                  <span style={{ fontWeight: 700, color: "#1a1a1a" }}>~{totalMonthlyAutodebet > 0 ? Math.floor(poketBalance / totalMonthlyAutodebet) : "\u221E"} bulan</span>
-                </div>
+                {totalMonthlyAutodebet > 0 ? (
+                  <>
+                    <div style={{ borderTop: "1px solid #F0F0F0", paddingTop: 10, display: "flex", justifyContent: "space-between", fontSize: 13 }}>
+                      <span style={{ color: "#6B7280", fontWeight: 500 }}>Total per bulan</span>
+                      <span style={{ fontWeight: 800, color: "#1a1a1a" }}>{formatRp(Math.round(totalMonthlyAutodebet))}</span>
+                    </div>
+                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, marginTop: 6 }}>
+                      <span style={{ color: "#6B7280", fontWeight: 500 }}>Saldo Poket cukup</span>
+                      <span style={{ fontWeight: 700, color: "#1a1a1a" }}>~{Math.floor(poketBalance / totalMonthlyAutodebet)} bulan</span>
+                    </div>
+                  </>
+                ) : (
+                  <div style={{ borderTop: "1px solid #F0F0F0", paddingTop: 12, textAlign: "center", fontSize: 13, color: "#9CA3AF", fontWeight: 500 }}>
+                    Tidak ada penanaman aktif
+                  </div>
+                )}
               </div>
 
               {/* Grouped assets */}
@@ -530,7 +578,7 @@
                 <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "flex-end", justifyContent: "center", zIndex: 100 }}>
                   <div style={{ width: "100%", maxWidth: 390, background: "white", borderRadius: "24px 24px 0 0", padding: "28px 24px 36px" }}>
                     <div style={{ width: 40, height: 4, borderRadius: 2, background: "#E5E7EB", margin: "0 auto 20px" }} />
-                    <div style={{ fontSize: 18, fontWeight: 800, color: "#1a1a1a", marginBottom: 4 }}>Ubah Penanaman Otomatis</div>
+                    <div style={{ fontSize: 18, fontWeight: 800, color: "#1a1a1a", marginBottom: 4 }}>Ubah Penanaman Terjadwal</div>
                     <div style={{ fontSize: 13, color: "#6B7280", fontWeight: 500, marginBottom: 20 }}>{cat?.name}</div>
                     <div style={{ fontSize: 13, fontWeight: 600, color: "#374151", marginBottom: 10 }}>Frekuensi</div>
                     <div style={{ display: "flex", gap: 8, marginBottom: 18 }}>
