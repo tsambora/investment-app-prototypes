@@ -17,7 +17,446 @@
   <script type="text/babel">
     const { useState, useMemo } = React;
 
-    const ProductSimulator = () => {
+    /* ───────────────────── STATUS BAR ───────────────────── */
+    const StatusBar = ({ light }) => (
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 20px 8px", fontSize: 12, fontWeight: 600, color: light ? "#fff" : "#1a1a1a" }}>
+        <span>9:41</span>
+        <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+          <svg width="16" height="12" viewBox="0 0 16 12" fill={light ? "#fff" : "#1a1a1a"}><rect x="0" y="8" width="3" height="4" rx="0.5" /><rect x="4.5" y="5" width="3" height="7" rx="0.5" /><rect x="9" y="2" width="3" height="10" rx="0.5" /><rect x="13.5" y="0" width="3" height="12" rx="0.5" opacity="0.3" /></svg>
+          <svg width="16" height="12" viewBox="0 0 16 12" fill={light ? "#fff" : "#1a1a1a"}><path d="M8 3C10.7 3 13.1 4.2 14.7 6.1L16 4.6C14 2.3 11.2 0.8 8 0.8S2 2.3 0 4.6L1.3 6.1C2.9 4.2 5.3 3 8 3Z" /><path d="M8 7C9.7 7 11.2 7.7 12.3 8.9L13.6 7.4C12.1 5.9 10.2 5 8 5S3.9 5.9 2.4 7.4L3.7 8.9C4.8 7.7 6.3 7 8 7Z" /><circle cx="8" cy="11" r="1.5" /></svg>
+          <svg width="25" height="12" viewBox="0 0 25 12" fill={light ? "#fff" : "#1a1a1a"}><rect x="0" y="1" width="22" height="10" rx="2" stroke={light ? "#fff" : "#1a1a1a"} strokeWidth="1" fill="none" /><rect x="2" y="3" width="14" height="6" rx="1" fill="#34C759" /><rect x="23" y="4" width="2" height="4" rx="0.5" /></svg>
+        </div>
+      </div>
+    );
+
+    /* ───────────────────── HOMEPAGE ───────────────────── */
+    const Homepage = ({ onOpenGGS }) => {
+      return (
+        <div style={{ minHeight: "100vh", background: "#FAFAF7", fontFamily: "'DM Sans', 'Segoe UI', sans-serif", position: "relative", paddingBottom: 80 }}>
+          <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&display=swap" rel="stylesheet" />
+
+          {/* Top area with dark background */}
+          <div style={{ background: "#1a1a1a", borderRadius: "0 0 24px 24px", paddingBottom: 24 }}>
+            <StatusBar light />
+
+            <div style={{ padding: "4px 20px 16px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <div style={{ fontFamily: "'Fraunces', Georgia, serif", fontSize: 18, fontWeight: 700, color: "#fff", letterSpacing: -0.3 }}>amarthafin</div>
+              <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+                <div style={{ position: "relative" }}>
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                  <div style={{ position: "absolute", top: -4, right: -6, width: 18, height: 18, borderRadius: "50%", background: "#EF4444", color: "#fff", fontSize: 10, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center" }}>8</div>
+                </div>
+                <div style={{ width: 32, height: 32, borderRadius: "50%", background: "#374151", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" strokeWidth="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                </div>
+              </div>
+            </div>
+
+            {/* Prosper balance card */}
+            <div style={{ margin: "0 20px", background: "linear-gradient(135deg, #2D1B4E 0%, #4A1D8A 50%, #6B21A8 100%)", borderRadius: 20, padding: "20px 22px", position: "relative", overflow: "hidden" }}>
+              <div style={{ position: "absolute", top: -20, right: -20, width: 120, height: 120, borderRadius: "50%", background: "rgba(255,255,255,0.06)" }} />
+              <div style={{ position: "absolute", bottom: -30, right: 30, width: 80, height: 80, borderRadius: "50%", background: "rgba(255,255,255,0.04)" }} />
+
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}>
+                <div style={{ background: "rgba(255,255,255,0.15)", borderRadius: 8, padding: "4px 10px", fontSize: 11, fontWeight: 600, color: "rgba(255,255,255,0.9)", letterSpacing: 0.3 }}>☘️ amartha prosper</div>
+              </div>
+
+              <div style={{ fontSize: 12, color: "rgba(255,255,255,0.6)", fontWeight: 500, marginBottom: 4 }}>Total aset</div>
+              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6 }}>
+                <div style={{ fontSize: 26, fontWeight: 700, color: "#fff", fontFamily: "'DM Sans', sans-serif", letterSpacing: -0.5 }}>Rp150.000.000</div>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              </div>
+              <div style={{ fontSize: 13, color: "#4ADE80", fontWeight: 500 }}>Total keuntungan <span style={{ fontWeight: 600 }}>+Rp0</span></div>
+
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 16, paddingTop: 14, borderTop: "1px solid rgba(255,255,255,0.1)" }}>
+                <div>
+                  <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
+                    <span style={{ fontSize: 12, color: "rgba(255,255,255,0.6)" }}>💳 Poket</span>
+                  </div>
+                  <div style={{ fontSize: 16, fontWeight: 700, color: "#fff" }}>Rp50.000.000</div>
+                </div>
+                <div style={{ display: "flex", gap: 10 }}>
+                  <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
+                    <div style={{ width: 36, height: 36, borderRadius: 10, background: "rgba(255,255,255,0.12)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    </div>
+                    <span style={{ fontSize: 10, color: "rgba(255,255,255,0.6)" }}>Isi Saldo</span>
+                  </div>
+                  <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
+                    <div style={{ width: 36, height: 36, borderRadius: 10, background: "rgba(255,255,255,0.12)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+                    </div>
+                    <span style={{ fontSize: 10, color: "rgba(255,255,255,0.6)" }}>Transfer</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Scrollable content */}
+          <div style={{ overflowY: "auto" }}>
+            <div style={{ padding: "24px 20px 0" }}>
+              <div style={{ fontSize: 16, fontWeight: 700, color: "#1a1a1a", marginBottom: 16 }}>Investasi</div>
+
+              {/* GGS card — clickable to catalog */}
+              <div onClick={onOpenGGS} style={{ background: "#fff", borderRadius: 16, padding: "18px 20px", marginBottom: 12, boxShadow: "0 1px 3px rgba(0,0,0,0.04)", border: "1px solid #F0ECF5", cursor: "pointer" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+                        <circle cx="12" cy="12" r="11" fill="#E8F5E9"/>
+                        <path d="M8 12c0-3 2-5 4-5s4 2 4 5" stroke="#2E7D32" strokeWidth="1.5" fill="none"/>
+                        <path d="M12 7v10M9 14l3 3 3-3" stroke="#2E7D32" strokeWidth="1.5" fill="none"/>
+                      </svg>
+                      <div>
+                        <div style={{ fontSize: 14, fontWeight: 600, color: "#1a1a1a" }}>Grassroots</div>
+                        <div style={{ fontSize: 10, color: "#9CA3AF", fontWeight: 500, marginTop: -1 }}>Growth Series</div>
+                      </div>
+                    </div>
+                  </div>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" strokeWidth="2" strokeLinecap="round"><path d="M9 18l6-6-6-6"/></svg>
+                </div>
+                <div style={{ fontSize: 12, color: "#9CA3AF", fontWeight: 500, marginBottom: 2 }}>Total aset</div>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
+                  <div style={{ fontSize: 22, fontWeight: 700, color: "#1a1a1a" }}>Rp100.000.000</div>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" strokeWidth="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                </div>
+                <div style={{ fontSize: 13, color: "#059669", fontWeight: 500 }}>Total keuntungan <span style={{ fontWeight: 600 }}>+Rp100.000.000</span></div>
+              </div>
+
+              {/* Celengan card */}
+              <div style={{ background: "#fff", borderRadius: 16, padding: "18px 20px", marginBottom: 24, boxShadow: "0 1px 3px rgba(0,0,0,0.04)", border: "1px solid #F0ECF5" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                  <div>
+                    <div style={{ fontSize: 14, fontWeight: 600, color: "#6B21A8", marginBottom: 6 }}>Penempatan dana dari Rp10.000</div>
+                    <div style={{ fontSize: 13, color: "#6B7280", lineHeight: 1.4, marginBottom: 10 }}>Dananya tumbuh dan bisa ditarik kapan pun.</div>
+                    <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                      <span style={{ fontSize: 16 }}>🌱</span>
+                      <span style={{ fontSize: 14, fontWeight: 600, color: "#059669" }}>Celengan</span>
+                    </div>
+                  </div>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" strokeWidth="2" strokeLinecap="round"><path d="M9 18l6-6-6-6"/></svg>
+                </div>
+              </div>
+            </div>
+
+            {/* Donasi dan tagihan */}
+            <div style={{ padding: "0 20px" }}>
+              <div style={{ fontSize: 16, fontWeight: 700, color: "#1a1a1a", marginBottom: 16 }}>Donasi dan tagihan</div>
+              <div style={{ display: "flex", gap: 16, marginBottom: 24 }}>
+                {[
+                  { icon: "🕌", label: "Zakat", bg: "#FEF3C7" },
+                  { icon: "📱", label: "Pulsa", bg: "#F3E8FF" },
+                  { icon: "📶", label: "Paket Data", bg: "#E0F2FE" },
+                  { icon: "🤲", label: "Donasi", bg: "#ECFDF5" },
+                  { icon: "•••", label: "Semua", bg: "#F3F4F6" },
+                ].map((item, i) => (
+                  <div key={i} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8, flex: 1 }}>
+                    <div style={{ width: 48, height: 48, borderRadius: 14, background: item.bg, display: "flex", alignItems: "center", justifyContent: "center", fontSize: item.icon === "•••" ? 14 : 20, border: "1px solid rgba(0,0,0,0.04)" }}>{item.icon}</div>
+                    <span style={{ fontSize: 11, color: "#6B7280", fontWeight: 500 }}>{item.label}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Quick links */}
+            <div style={{ padding: "0 20px", display: "flex", gap: 10, marginBottom: 20 }}>
+              <div style={{ flex: 1, background: "#fff", borderRadius: 24, padding: "12px 18px", display: "flex", alignItems: "center", gap: 8, border: "1px solid #E5E7EB" }}>
+                <span style={{ fontSize: 16 }}>❓</span>
+                <span style={{ fontSize: 13, fontWeight: 600, color: "#374151" }}>Tanya Jawab</span>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" strokeWidth="2" style={{ marginLeft: "auto" }}><path d="M9 18l6-6-6-6"/></svg>
+              </div>
+              <div style={{ flex: 1, background: "#fff", borderRadius: 24, padding: "12px 18px", display: "flex", alignItems: "center", gap: 8, border: "1px solid #E5E7EB" }}>
+                <span style={{ fontSize: 16 }}>🛡️</span>
+                <span style={{ fontSize: 13, fontWeight: 600, color: "#374151" }}>AmarthaCare</span>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" strokeWidth="2" style={{ marginLeft: "auto" }}><path d="M9 18l6-6-6-6"/></svg>
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div style={{ textAlign: "center", padding: "0 20px 20px" }}>
+              <div style={{ fontSize: 12, color: "#9CA3AF" }}>Terms & Conditions · Privacy Policy</div>
+              <div style={{ fontSize: 11, color: "#D1D5DB", marginTop: 6 }}>Berizin & Diawasi oleh</div>
+              <div style={{ fontSize: 12, color: "#9CA3AF", fontWeight: 600 }}>Otoritas Jasa Keuangan</div>
+            </div>
+          </div>
+
+          {/* Bottom nav bar */}
+          <div style={{
+            position: "fixed",
+            bottom: 0,
+            left: "50%",
+            transform: "translateX(-50%)",
+            width: "100%",
+            maxWidth: 390,
+            background: "#fff",
+            borderTop: "1px solid #F0ECF5",
+            display: "flex",
+            justifyContent: "space-around",
+            padding: "10px 0 24px",
+            zIndex: 10,
+          }}>
+            {[
+              { icon: "🏠", label: "Home", active: true },
+              { icon: "📷", label: "Scan", active: false },
+              { icon: "🌱", label: "Celengan", active: false },
+              { icon: "📋", label: "Transaksi", active: false },
+            ].map((tab, i) => (
+              <div key={i} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4, cursor: "pointer" }}>
+                <span style={{ fontSize: 20 }}>{tab.icon}</span>
+                <span style={{ fontSize: 10, fontWeight: tab.active ? 700 : 500, color: tab.active ? "#6B21A8" : "#9CA3AF" }}>{tab.label}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    };
+
+    /* ───────────────────── GGS CATALOG PAGE ───────────────────── */
+    const GGSCatalog = ({ onOpenSimulator, onBack }) => {
+      const products = [
+        {
+          id: "dynamic",
+          name: "Dynamic",
+          rate: 14,
+          payout: "Per 1 bulan",
+          color: "#6B21A8",
+          iconBg: "linear-gradient(135deg, #F3E8FF, #E9D5FF)",
+          icon: (
+            <svg width="28" height="28" viewBox="0 0 32 32" fill="none">
+              <path d="M6 24L13 14L19 18L26 8" stroke="#6B21A8" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M22 8H26V12" stroke="#6B21A8" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          ),
+          promo: "Promo Sepatu Lokal",
+        },
+        {
+          id: "progressive",
+          name: "Progressive",
+          rate: 11,
+          payout: "Per 1 bulan",
+          color: "#D97706",
+          iconBg: "linear-gradient(135deg, #FEF3C7, #FDE68A)",
+          icon: (
+            <svg width="28" height="28" viewBox="0 0 32 32" fill="none">
+              <path d="M6 22L13 16L19 20L26 10" stroke="#D97706" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M22 10H26V14" stroke="#D97706" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          ),
+          promo: null,
+        },
+        {
+          id: "balanced",
+          name: "Balanced",
+          rate: 8,
+          payout: "Per 1 bulan",
+          color: "#0D9488",
+          iconBg: "linear-gradient(135deg, #CCFBF1, #99F6E4)",
+          icon: (
+            <svg width="28" height="28" viewBox="0 0 32 32" fill="none">
+              <path d="M6 20L13 16L19 18L26 12" stroke="#0D9488" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M22 12H26V16" stroke="#0D9488" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          ),
+          promo: null,
+        },
+        {
+          id: "balancedflex",
+          name: "Balanced - Flex",
+          rate: 6.5,
+          payout: "Per 1 bulan",
+          color: "#2563EB",
+          iconBg: "linear-gradient(135deg, #DBEAFE, #BFDBFE)",
+          icon: (
+            <svg width="28" height="28" viewBox="0 0 32 32" fill="none">
+              <path d="M6 20L13 17L19 19L26 14" stroke="#2563EB" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M22 14H26V18" stroke="#2563EB" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          ),
+          promo: null,
+        },
+      ];
+
+      return (
+        <div style={{ minHeight: "100vh", background: "#FAFAF7", fontFamily: "'DM Sans', 'Segoe UI', sans-serif" }}>
+          <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&display=swap" rel="stylesheet" />
+
+          <StatusBar />
+
+          {/* Header */}
+          <div style={{ padding: "8px 20px 16px", display: "flex", alignItems: "center", gap: 12 }}>
+            <div onClick={onBack} style={{ width: 36, height: 36, borderRadius: 10, background: "#F0ECF5", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1a1a1a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                <circle cx="12" cy="12" r="11" fill="#E8F5E9"/>
+                <path d="M8 12c0-3 2-5 4-5s4 2 4 5" stroke="#2E7D32" strokeWidth="1.5" fill="none"/>
+                <path d="M12 7v10M9 14l3 3 3-3" stroke="#2E7D32" strokeWidth="1.5" fill="none"/>
+              </svg>
+              <div>
+                <div style={{ fontSize: 16, fontWeight: 700, color: "#1a1a1a" }}>Grassroots</div>
+                <div style={{ fontSize: 10, color: "#9CA3AF", fontWeight: 500, marginTop: -2 }}>Growth Series</div>
+              </div>
+            </div>
+          </div>
+
+          <div style={{ overflowY: "auto", paddingBottom: 40 }}>
+            {/* Portfolio summary card */}
+            <div style={{ padding: "0 20px", marginBottom: 16 }}>
+              <div style={{ background: "linear-gradient(135deg, #E8F5E9 0%, #C8E6C9 100%)", borderRadius: 20, padding: "24px 22px", textAlign: "center" }}>
+                <div style={{ fontSize: 12, color: "#6B7280", fontWeight: 500, marginBottom: 4 }}>Total aset</div>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 10, marginBottom: 6 }}>
+                  <div style={{ fontSize: 28, fontWeight: 700, color: "#1a1a1a", fontFamily: "'DM Sans', sans-serif", letterSpacing: -0.5 }}>Rp100.000.000</div>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" strokeWidth="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                </div>
+                <div style={{ fontSize: 13, color: "#374151", fontWeight: 500 }}>Total keuntungan <strong style={{ color: "#059669" }}>Rp10.000.000</strong></div>
+
+                <button style={{
+                  marginTop: 16,
+                  width: "100%",
+                  padding: "14px",
+                  borderRadius: 14,
+                  border: "1.5px solid rgba(0,0,0,0.08)",
+                  background: "#fff",
+                  fontSize: 14,
+                  fontWeight: 600,
+                  color: "#1a1a1a",
+                  cursor: "pointer",
+                  fontFamily: "'DM Sans', sans-serif",
+                }}>
+                  Lihat Semua Aset
+                </button>
+              </div>
+            </div>
+
+            {/* ─── SIMULATOR BANNER ─── */}
+            <div style={{ padding: "0 20px", marginBottom: 20 }}>
+              <div
+                onClick={onOpenSimulator}
+                style={{
+                  background: "linear-gradient(135deg, #F8F6FB 0%, #F0ECF5 50%, #E8F5E9 100%)",
+                  borderRadius: 16,
+                  padding: "16px 18px",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 14,
+                  border: "1px solid #E5DEEE",
+                  position: "relative",
+                  overflow: "hidden",
+                }}
+              >
+                <div style={{ position: "absolute", top: 6, right: 50, fontSize: 10, opacity: 0.25 }}>✦</div>
+                <div style={{ position: "absolute", bottom: 8, right: 20, fontSize: 8, opacity: 0.2 }}>✦</div>
+
+                <div style={{
+                  width: 44,
+                  height: 44,
+                  borderRadius: 14,
+                  background: "linear-gradient(135deg, #059669, #10B981)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  flexShrink: 0,
+                  boxShadow: "0 2px 8px rgba(5,150,105,0.25)",
+                }}>
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="4" y="4" width="16" height="16" rx="2"/>
+                    <path d="M8 16l3-4 2 2 3-4"/>
+                  </svg>
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: 14, fontWeight: 600, color: "#1a1a1a", lineHeight: 1.3, marginBottom: 3 }}>
+                    Mau tahu potensi imbal hasilmu?
+                  </div>
+                  <div style={{ fontSize: 12, color: "#059669", fontWeight: 600, display: "flex", alignItems: "center", gap: 4 }}>
+                    Simulasikan di sini
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#059669" strokeWidth="2.5" strokeLinecap="round"><path d="M9 18l6-6-6-6"/></svg>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Section header */}
+            <div style={{ padding: "0 20px", marginBottom: 14 }}>
+              <div style={{ fontSize: 16, fontWeight: 700, color: "#1a1a1a" }}>Investasi untuk Anda</div>
+            </div>
+
+            {/* Product cards */}
+            <div style={{ padding: "0 20px", display: "flex", flexDirection: "column", gap: 12 }}>
+              {products.map((product) => (
+                <div key={product.id} style={{
+                  background: "#fff",
+                  borderRadius: 16,
+                  padding: "20px",
+                  boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
+                  border: "1px solid #F0ECF5",
+                  position: "relative",
+                  cursor: "pointer",
+                }}>
+                  {/* Promo badge */}
+                  {product.promo && (
+                    <div style={{
+                      position: "absolute",
+                      top: 16,
+                      right: 16,
+                      background: "#EF4444",
+                      color: "#fff",
+                      fontSize: 11,
+                      fontWeight: 600,
+                      padding: "4px 10px",
+                      borderRadius: 8,
+                    }}>
+                      {product.promo}
+                    </div>
+                  )}
+
+                  {/* Product icon + name */}
+                  <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
+                    <div style={{
+                      width: 40,
+                      height: 40,
+                      borderRadius: 12,
+                      background: product.iconBg,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}>
+                      {product.icon}
+                    </div>
+                    <div style={{ fontSize: 16, fontWeight: 700, color: "#1a1a1a" }}>{product.name}</div>
+                  </div>
+
+                  {/* Stats row */}
+                  <div style={{ display: "flex", gap: 24 }}>
+                    <div>
+                      <div style={{ fontSize: 11, color: "#9CA3AF", fontWeight: 500, marginBottom: 4 }}>Keuntungan hingga</div>
+                      <div style={{ fontSize: 18, fontWeight: 700, color: "#1a1a1a" }}>{product.rate}% <span style={{ fontSize: 13, fontWeight: 500, color: "#6B7280" }}>per tahun</span></div>
+                    </div>
+                    <div>
+                      <div style={{ fontSize: 11, color: "#9CA3AF", fontWeight: 500, marginBottom: 4 }}>Penerimaan keuntungan</div>
+                      <div style={{ fontSize: 14, fontWeight: 600, color: "#1a1a1a" }}>{product.payout}</div>
+                    </div>
+                  </div>
+
+                  {/* Auto withdrawal */}
+                  <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 12 }}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" strokeWidth="2">
+                      <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                    <span style={{ fontSize: 12, color: "#9CA3AF", fontWeight: 500 }}>Penarikan otomatis</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+    /* ───────────────────── PRODUCT SIMULATOR ───────────────────── */
+    const ProductSimulator = ({ onBack }) => {
   const [amount, setAmount] = useState(10000000);
   const [frequency, setFrequency] = useState("monthly");
   const [duration, setDuration] = useState(12);
@@ -128,21 +567,19 @@
         rel="stylesheet"
       />
 
-      {/* Status bar */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 20px 8px", fontSize: 12, fontWeight: 600, color: "#1a1a1a" }}>
-        <span>9:41</span>
-        <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
-          <svg width="16" height="12" viewBox="0 0 16 12" fill="#1a1a1a"><rect x="0" y="8" width="3" height="4" rx="0.5" /><rect x="4.5" y="5" width="3" height="7" rx="0.5" /><rect x="9" y="2" width="3" height="10" rx="0.5" /><rect x="13.5" y="0" width="3" height="12" rx="0.5" opacity="0.3" /></svg>
-          <svg width="16" height="12" viewBox="0 0 16 12" fill="#1a1a1a"><path d="M8 3C10.7 3 13.1 4.2 14.7 6.1L16 4.6C14 2.3 11.2 0.8 8 0.8S2 2.3 0 4.6L1.3 6.1C2.9 4.2 5.3 3 8 3Z" /><path d="M8 7C9.7 7 11.2 7.7 12.3 8.9L13.6 7.4C12.1 5.9 10.2 5 8 5S3.9 5.9 2.4 7.4L3.7 8.9C4.8 7.7 6.3 7 8 7Z" /><circle cx="8" cy="11" r="1.5" /></svg>
-          <svg width="25" height="12" viewBox="0 0 25 12" fill="#1a1a1a"><rect x="0" y="1" width="22" height="10" rx="2" stroke="#1a1a1a" strokeWidth="1" fill="none" /><rect x="2" y="3" width="14" height="6" rx="1" fill="#34C759" /><rect x="23" y="4" width="2" height="4" rx="0.5" /></svg>
-        </div>
-      </div>
+      <StatusBar />
 
       {/* Header */}
       <div style={{ padding: "8px 20px 20px", display: "flex", alignItems: "center", gap: 12 }}>
         <div
           style={{ width: 36, height: 36, borderRadius: 10, background: "#F0ECF5", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}
-          onClick={() => setShowResults(false)}
+          onClick={() => {
+            if (showResults) {
+              setShowResults(false);
+            } else {
+              onBack();
+            }
+          }}
         >
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6B21A8" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
         </div>
@@ -688,7 +1125,20 @@
   );
 };
 
-    ReactDOM.createRoot(document.getElementById("root")).render(<ProductSimulator />);
+    /* ───────────────────── APP SHELL ───────────────────── */
+    const App = () => {
+      const [screen, setScreen] = useState("home");
+
+      return (
+        <div style={{ maxWidth: 390, margin: "0 auto", minHeight: "100vh", position: "relative" }}>
+          {screen === "home" && <Homepage onOpenGGS={() => setScreen("catalog")} />}
+          {screen === "catalog" && <GGSCatalog onOpenSimulator={() => setScreen("simulator")} onBack={() => setScreen("home")} />}
+          {screen === "simulator" && <ProductSimulator onBack={() => setScreen("catalog")} />}
+        </div>
+      );
+    };
+
+    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
   </script>
 </body>
 </html>
